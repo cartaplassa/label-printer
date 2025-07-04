@@ -23,6 +23,7 @@ interface SheetProps extends React.ComponentPropsWithoutRef<'div'> {}
 function Sheet({ className, ...rest }: SheetProps) {
     const paperFormat = useConfigStore((state) => state.paperFormat);
     const isPaperRotationAlbum = useConfigStore(
+        // TODO finish that
         (state) => state.isPaperRotationAlbum,
     );
     const {
@@ -67,7 +68,8 @@ function Sheet({ className, ...rest }: SheetProps) {
 
     return (
         <div
-            className={cn('bg-white border border-red-500', className)}
+            id="PRINTAREA"
+            className={cn('bg-white', className)}
             style={{
                 ...paperSize,
                 padding: stringifyPaddings(sheetPaddings, measurementUnit),
@@ -87,7 +89,6 @@ function Sheet({ className, ...rest }: SheetProps) {
                         <div
                             key={i}
                             style={{
-                                border: '1px solid red',
                                 width: labelWidth + measurementUnit,
                                 height: labelHeight + measurementUnit,
                                 maxWidth: labelWidth + measurementUnit,
@@ -117,6 +118,16 @@ function Sheet({ className, ...rest }: SheetProps) {
     );
 }
 
+const ControlButton = ({
+    className,
+    children,
+    ...rest
+}: React.ComponentPropsWithoutRef<typeof Button>) => (
+    <Button className={cn('border border-stone-500', className)} {...rest}>
+        {children}
+    </Button>
+);
+
 const Controls = () => {
     const { zoomIn, zoomOut, resetTransform } = useControls();
 
@@ -128,15 +139,15 @@ const Controls = () => {
                 'flex gap-2',
             )}
         >
-            <Button onClick={() => zoomIn()}>
+            <ControlButton onClick={() => zoomIn()}>
                 <Plus />
-            </Button>
-            <Button onClick={() => zoomOut()}>
+            </ControlButton>
+            <ControlButton onClick={() => zoomOut()}>
                 <Minus />
-            </Button>
-            <Button onClick={() => resetTransform()}>
+            </ControlButton>
+            <ControlButton onClick={() => resetTransform()}>
                 <RotateCcw />
-            </Button>
+            </ControlButton>
         </div>
     );
 };

@@ -95,7 +95,7 @@ const useConfigStore = create<Config>()(
                 if (type === "left" && newValue > draft.labelWidth / 2 ) return;
                 draft.labelPaddings[type] = newValue;
             }),
-
+            // TODO: customizable borders, gaps and whatnot
         })),
         { name: 'labelPrinterStore' },
     ),
