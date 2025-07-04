@@ -28,8 +28,8 @@ function NumberSetter({
     ...rest
 }: NumberSetterProps) {
     return (
-        <div className={cn('flex', className)} {...rest}>
-            <span>{label}</span>
+        <div className={cn('flex gap-3 items-center', className)} {...rest}>
+            <span className="min-w-12 max-w-12">{label}</span>
             <Slider
                 defaultValue={[value]}
                 onValueChange={(newValue) => setValue(newValue[0])}
@@ -39,7 +39,9 @@ function NumberSetter({
                 className={cn('grow')}
             />
             <Input
+                className="min-w-24 max-w-24"
                 type="number"
+                step={0.01}
                 value={value}
                 onChange={(e) => setValue(Number(e.target.value))}
             />

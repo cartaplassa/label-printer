@@ -81,35 +81,37 @@ function Sheet({ className, ...rest }: SheetProps) {
                     gridTemplateRows: `repeat(${rows}, ${labelHeight + measurementUnit})`,
                 }}
             >
-                {[...Array(columns * rows).keys()].map((i) => (
-                    <div
-                        key={i}
-                        style={{
-                            border: '1px solid red',
-                            width: labelWidth + measurementUnit,
-                            height: labelHeight + measurementUnit,
-                            maxWidth: labelWidth + measurementUnit,
-                            maxHeight: labelHeight + measurementUnit,
-                            padding: stringifyPaddings(
-                                labelPaddings,
-                                measurementUnit,
-                            ),
-                            boxSizing: 'border-box',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        {!isPaddingOverflow && (
-                            <img
-                                className={cn(
-                                    'object-contain', // TODO 'object-scale-down' conditionally
-                                    'size-full',
-                                )}
-                                src={label}
-                                alt="Label"
-                            />
-                        )}
-                    </div>
-                ))}
+                {columns > 0 &&
+                    rows > 0 &&
+                    [...Array(columns * rows).keys()].map((i) => (
+                        <div
+                            key={i}
+                            style={{
+                                border: '1px solid red',
+                                width: labelWidth + measurementUnit,
+                                height: labelHeight + measurementUnit,
+                                maxWidth: labelWidth + measurementUnit,
+                                maxHeight: labelHeight + measurementUnit,
+                                padding: stringifyPaddings(
+                                    labelPaddings,
+                                    measurementUnit,
+                                ),
+                                boxSizing: 'border-box',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {!isPaddingOverflow && (
+                                <img
+                                    className={cn(
+                                        'object-contain', // TODO 'object-scale-down' conditionally
+                                        'size-full',
+                                    )}
+                                    src={label}
+                                    alt="Label"
+                                />
+                            )}
+                        </div>
+                    ))}
             </div>
         </div>
     );
