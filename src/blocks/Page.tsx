@@ -48,38 +48,68 @@ function Sheet({ className, ...rest }: SheetProps) {
     const isPaddingOverflow =
         labelWidth <= labelPaddings.left + labelPaddings.right ||
         labelHeight <= labelPaddings.top + labelPaddings.bottom;
+    const columns = Math.floor(
+        (PAPER_FORMAT_DIMENSIONS[paperFormat][
+            !isPaperRotationAlbum ? 'width' : 'height'
+        ] -
+            sheetPaddings.left -
+            sheetPaddings.right) /
+            labelWidth,
+    );
+    const rows = Math.floor(
+        (PAPER_FORMAT_DIMENSIONS[paperFormat][
+            !isPaperRotationAlbum ? 'height' : 'width'
+        ] -
+            sheetPaddings.top -
+            sheetPaddings.bottom) /
+            labelHeight,
+    );
 
     return (
         <div
             className={cn('bg-white border border-red-500', className)}
-            {...rest}
             style={{
                 ...paperSize,
                 padding: stringifyPaddings(sheetPaddings, measurementUnit),
             }}
+            {...rest}
         >
             <div
                 style={{
-                    border: '1px solid red',
-                    width: labelWidth + measurementUnit,
-                    height: labelHeight + measurementUnit,
-                    maxWidth: labelWidth + measurementUnit,
-                    maxHeight: labelHeight + measurementUnit,
-                    padding: stringifyPaddings(labelPaddings, measurementUnit),
-                    boxSizing: 'border-box',
-                    overflow: 'hidden',
+                    display: 'grid',
+                    gridTemplateColumns: `repeat(${columns}, ${labelWidth + measurementUnit})`,
+                    gridTemplateRows: `repeat(${rows}, ${labelHeight + measurementUnit})`,
                 }}
             >
-                {!isPaddingOverflow && (
-                    <img
-                        className={cn(
-                            'object-contain', // TODO 'object-scale-down' conditionally
-                            'size-full',
+                {[...Array(columns * rows).keys()].map((i) => (
+                    <div
+                        key={i}
+                        style={{
+                            border: '1px solid red',
+                            width: labelWidth + measurementUnit,
+                            height: labelHeight + measurementUnit,
+                            maxWidth: labelWidth + measurementUnit,
+                            maxHeight: labelHeight + measurementUnit,
+                            padding: stringifyPaddings(
+                                labelPaddings,
+                                measurementUnit,
+                            ),
+                            boxSizing: 'border-box',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        {!isPaddingOverflow && (
+                            <img
+                                className={cn(
+                                    'object-contain', // TODO 'object-scale-down' conditionally
+                                    'size-full',
+                                )}
+                                src={label}
+                                alt="Label"
+                            />
                         )}
-                        src={label}
-                        alt="Label"
-                    />
-                )}
+                    </div>
+                ))}
             </div>
         </div>
     );
