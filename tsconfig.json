@@ -12,8 +12,8 @@
         "rootDirs": [".", "./.react-router/types"],
         "baseUrl": ".",
         "paths": {
-            "~/*": ["./*"],
-            "@/*": ["./src/*"]
+            "@/*": ["./src/*"],
+            "~/*": ["./*"]
         },
         "useDefineForClassFields": true,
         "skipLibCheck": true,

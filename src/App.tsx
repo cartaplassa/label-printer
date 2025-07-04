@@ -1,46 +1,21 @@
 import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
-import './App.css';
-import cn from '@/utils/cn';
+import cn from '@/cn';
+import Page from './blocks/Page';
+import Settings from './blocks/Settings';
 
 function App() {
-    const [count, setCount] = useState(0);
-
     return (
         <div
             className={cn(
-                'bg-white dark:bg-black',
-                'text-black dark:text-white',
+                'flex items-center',
+                'w-dvw max-w-dvw h-dvh max-h-dvh',
+                'bg-stone-400',
             )}
         >
-            <div className="flex justify-around">
-                <a href="https://vite.dev" target="_blank" rel="noopener">
-                    <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank" rel="noopener">
-                    <img
-                        src={reactLogo}
-                        className="logo react"
-                        alt="React logo"
-                    />
-                </a>
-            </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button
-                    type="button"
-                    onClick={() => setCount((count) => count + 1)}
-                >
-                    count is {count}
-                </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more
-            </p>
+            <Page className="grow" />
+            <Settings className="fixed right-2 top-[50%] transform -translate-y-1/2" />
         </div>
     );
 }
