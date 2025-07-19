@@ -1,6 +1,10 @@
 import cn from '@/cn';
-import useConfigStore, { PAPER_FORMAT_DIMENSIONS, Side, Sides } from '../store';
-import { useMemo } from 'react';
+import useConfigStore, {
+    type MeasurementUnit,
+    PAPER_FORMAT_DIMENSIONS,
+    type Side,
+    type Sides,
+} from '../store';
 import {
     TransformWrapper,
     TransformComponent,
@@ -10,12 +14,9 @@ import type { ClassValue } from 'clsx';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 
-const stringifyPaddings = (
-    paddings: Sides<number>,
-    measurementUnit: string, //TODO - make a literal type?
-) =>
+const stringifyPaddings = (paddings: Sides<number>, measurementUnit: string) =>
     Object.keys(paddings)
-        .map((side) => paddings[side as Side] + measurementUnit)
+        .map((side) => String(paddings[side as Side]) + measurementUnit)
         .join(' ');
 
 interface SheetProps extends React.ComponentPropsWithoutRef<'div'> {}

@@ -1,13 +1,10 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
 import cn from '@/cn';
 import Page from './blocks/Page';
 import Settings from './blocks/Settings';
 
 function App() {
     return (
-        <div
+        <div // TODO low-width breakpoint
             className={cn(
                 'flex items-center',
                 'w-dvw max-w-dvw h-dvh max-h-dvh',

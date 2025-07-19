@@ -26,9 +26,9 @@ export default function FilePickerTrigger() {
     };
 
     return (
-        <div className="grid w-full max-w-sm items-center gap-6">
-            <Label htmlFor="picture">Label</Label>
+        <Label htmlFor="picture">
+            Label
             <Input id="picture" type="file" onChange={handleImageChange} />
-        </div>
+        </Label>
     );
 }

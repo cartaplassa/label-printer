@@ -13,9 +13,10 @@ export const PAPER_FORMAT_DIMENSIONS = {
     Letter: { width: 8.5, height: 11, unit: 'in' },
     Legal: { width: 8.5, height: 14, unit: 'in' },
     Tabloid: { width: 11, height: 17, unit: 'in' },
-};
+} as const;
 
 export type PaperFormat = keyof typeof PAPER_FORMAT_DIMENSIONS;
+export type MeasurementUnit = Pick<(typeof PAPER_FORMAT_DIMENSIONS)[PaperFormat], "unit">
 
 export type Side = "top" | "right" | "bottom" | "left"
 export type Sides<T> = Record<Side, T>
