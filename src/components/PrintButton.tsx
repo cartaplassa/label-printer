@@ -13,7 +13,7 @@ const PrintButton = () => {
                 popup.document.body.innerHTML = printableAreaContent;
                 popup.document.body.style = 'margin: 0'; // TODO Full CSS reset
                 popup.print();
-                popup.close();
+                // popup.close();
             }}
         >
             <Printer />

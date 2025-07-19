@@ -104,10 +104,13 @@ function Sheet({ className, ...rest }: SheetProps) {
                         >
                             {!isPaddingOverflow && (
                                 <img
-                                    className={cn(
-                                        'object-contain', // TODO 'object-scale-down' conditionally
-                                        'size-full',
-                                    )}
+                                    //NOTE - Tailwind won't work in separate window
+                                    style={{
+                                        // TODO 'object-scale-down' conditionally
+                                        objectFit: 'contain',
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
                                     src={label}
                                     alt="Label"
                                 />
