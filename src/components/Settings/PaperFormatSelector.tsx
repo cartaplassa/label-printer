@@ -3,16 +3,16 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
 
 import cn from '@/cn';
 import type { ClassValue } from 'clsx';
+import type { ComponentPropsWithoutRef } from 'react';
 
 interface PaperFormatSelectorProps
-    extends React.ComponentPropsWithoutRef<typeof Select> {
+    extends ComponentPropsWithoutRef<typeof Select> {
     className?: ClassValue;
     options: string[];
 }

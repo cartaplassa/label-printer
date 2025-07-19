@@ -7,7 +7,7 @@ const RepoLink = () => (
         target="_blank"
         rel="noopener"
     >
-        <Button>
+        <Button variant="outline">
             <Github />
         </Button>
     </a>

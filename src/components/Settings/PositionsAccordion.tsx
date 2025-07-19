@@ -11,8 +11,9 @@ import useConfigStore, {
     type PaperFormat,
 } from '@/store';
 import { Input } from '../ui/input';
+import type { ComponentPropsWithoutRef } from 'react';
 
-interface NumberSetterProps extends React.ComponentPropsWithoutRef<'div'> {
+interface NumberSetterProps extends ComponentPropsWithoutRef<'div'> {
     value: number;
     setValue: (newValue: number) => void;
     max: number;
@@ -50,7 +51,7 @@ function NumberSetter({
 }
 
 interface PositionsAccordionItemProps
-    extends React.ComponentPropsWithoutRef<typeof AccordionItem> {}
+    extends ComponentPropsWithoutRef<typeof AccordionItem> {}
 
 function PositionsAccordionItem({
     className,

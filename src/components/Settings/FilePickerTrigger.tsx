@@ -1,16 +1,13 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useConfigStore from '@/store';
-
-interface FilePickerTriggerProps extends React.ComponentPropsWithoutRef<'div'> {
-    fileSetter: (file: string) => void;
-}
+import type { ChangeEvent } from 'react';
 
 export default function FilePickerTrigger() {
     const setLabel = useConfigStore((state) => state.setLabel);
     const resetLabel = useConfigStore((state) => state.resetLabel);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();

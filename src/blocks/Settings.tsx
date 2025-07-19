@@ -1,22 +1,14 @@
 import cn from '@/cn';
 import useConfigStore, { PAPER_FORMAT_DIMENSIONS } from '@/store';
-import {
-    Select,
-    SelectContent,
-    SelectGroup,
-    SelectItem,
-    SelectLabel,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import PaperFormatSelector from '@/components/Settings/PaperFormatSelector';
 import ThemeToggle from '@/components/ThemeToggle';
 import FilePickerTrigger from '@/components/Settings/FilePickerTrigger';
 import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
 import RepoLink from '@/components/RepoLink';
 import PrintButton from '@/components/PrintButton';
+import type { ComponentPropsWithoutRef } from 'react';
 
-interface SettingsProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
 
 function Settings({ className, ...rest }: SettingsProps) {
     const paperFormat = useConfigStore((state) => state.paperFormat);

@@ -1,6 +1,5 @@
 import cn from '@/cn';
 import useConfigStore, {
-    type MeasurementUnit,
     PAPER_FORMAT_DIMENSIONS,
     type Side,
     type Sides,
@@ -13,13 +12,14 @@ import {
 import type { ClassValue } from 'clsx';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
+import type { ComponentPropsWithoutRef } from 'react';
 
 const stringifyPaddings = (paddings: Sides<number>, measurementUnit: string) =>
     Object.keys(paddings)
         .map((side) => String(paddings[side as Side]) + measurementUnit)
         .join(' ');
 
-interface SheetProps extends React.ComponentPropsWithoutRef<'div'> {}
+interface SheetProps extends ComponentPropsWithoutRef<'div'> {}
 
 function Sheet({ className, ...rest }: SheetProps) {
     const paperFormat = useConfigStore((state) => state.paperFormat);
@@ -123,8 +123,12 @@ const ControlButton = ({
     className,
     children,
     ...rest
-}: React.ComponentPropsWithoutRef<typeof Button>) => (
-    <Button className={cn('border border-stone-500', className)} {...rest}>
+}: ComponentPropsWithoutRef<typeof Button>) => (
+    <Button
+        variant="secondary"
+        className={cn('border border-stone-500', className)}
+        {...rest}
+    >
         {children}
     </Button>
 );
@@ -153,8 +157,7 @@ const Controls = () => {
     );
 };
 
-interface PageProps
-    extends React.ComponentPropsWithoutRef<typeof TransformWrapper> {
+interface PageProps extends ComponentPropsWithoutRef<typeof TransformWrapper> {
     className: ClassValue;
 }
 
@@ -167,21 +170,19 @@ function Page({ className, ...rest }: PageProps) {
             initialPositionY={0}
             {...rest}
         >
-            {({ zoomIn, zoomOut, resetTransform, ...rest }) => (
-                <div className="grow">
-                    <Controls />
-                    <TransformComponent
-                        wrapperStyle={{
-                            width: '100dvw',
-                            maxWidth: '100dvw',
-                            height: '100dvh',
-                            maxHeight: '100dvh',
-                        }}
-                    >
-                        <Sheet />
-                    </TransformComponent>
-                </div>
-            )}
+            <div className="grow">
+                <Controls />
+                <TransformComponent
+                    wrapperStyle={{
+                        width: '100dvw',
+                        maxWidth: '100dvw',
+                        height: '100dvh',
+                        maxHeight: '100dvh',
+                    }}
+                >
+                    <Sheet />
+                </TransformComponent>
+            </div>
         </TransformWrapper>
     );
 }
