@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import exampleLabel from '@/assets/example.svg';
+import exampleImage from '@/components/exampleImage';
 
 export const PAPER_FORMAT_DIMENSIONS = {
     A0: { width: 84.1, height: 118.9, unit: 'cm' },
@@ -58,7 +59,7 @@ const useConfigStore = create<Config>()(
                 set((draft) => {
                     draft.isPaperRotationAlbum = !draft.isPaperRotationAlbum;
                 }),
-            label: exampleLabel,
+            label: exampleImage,
             setLabel: (newLabel: string) => set((draft) => {
                 console.log(newLabel)
                 draft.label = newLabel
