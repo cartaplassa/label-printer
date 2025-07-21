@@ -8,12 +8,20 @@ import RepoLink from '@/components/RepoLink';
 import PrintButton from '@/components/PrintButton';
 import type { ComponentPropsWithoutRef } from 'react';
 import ReloadFrame from '@/components/ReloadFrame';
+import { Button } from '@/components/ui/button';
+import { RotateCcwSquare, RotateCwSquare } from 'lucide-react';
 
 interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
 
 function Settings({ className, ...rest }: SettingsProps) {
     const paperFormat = useConfigStore((state) => state.paperFormat);
     const setPaperFormat = useConfigStore((state) => state.setPaperFormat);
+    const isPaperRotationAlbum = useConfigStore(
+        (state) => state.isPaperRotationAlbum,
+    );
+    const togglePaperRotation = useConfigStore(
+        (state) => state.togglePaperRotation,
+    );
 
     return (
         <div
@@ -38,12 +46,24 @@ function Settings({ className, ...rest }: SettingsProps) {
                 <RepoLink />
             </div>
             <ReloadFrame />
-            <PaperFormatSelector
-                className="w-full"
-                value={paperFormat}
-                onValueChange={setPaperFormat}
-                options={Object.keys(PAPER_FORMAT_DIMENSIONS)}
-            />
+            <div className="flex gap-2 items-center">
+                <PaperFormatSelector
+                    className="w-full"
+                    value={paperFormat}
+                    onValueChange={setPaperFormat}
+                    options={Object.keys(PAPER_FORMAT_DIMENSIONS)}
+                />
+                <Button
+                    onClick={togglePaperRotation}
+                    variant={isPaperRotationAlbum ? 'default' : 'outline'}
+                >
+                    {isPaperRotationAlbum ? (
+                        <RotateCwSquare />
+                    ) : (
+                        <RotateCcwSquare />
+                    )}
+                </Button>
+            </div>
             <FilePickerTrigger />
             <PositionsAccordion paperFormat={paperFormat} />
         </div>

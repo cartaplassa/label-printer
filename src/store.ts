@@ -39,7 +39,7 @@ type Config = {
     paperFormat: PaperFormat;
     setPaperFormat: (paperFormat: PaperFormat) => void;
     isPaperRotationAlbum: boolean;
-    setPaperRotationAlbum: () => void;
+    togglePaperRotation: () => void;
     label: string;
     setLabel: (newLabel: string) => void;
     resetLabel: () => void;
@@ -62,7 +62,7 @@ const useConfigStore = create<Config>()(
                     draft.paperFormat = newFormat;
                 }),
             isPaperRotationAlbum: false,
-            setPaperRotationAlbum: () =>
+            togglePaperRotation: () =>
                 set((draft) => {
                     draft.isPaperRotationAlbum = !draft.isPaperRotationAlbum;
                 }),
