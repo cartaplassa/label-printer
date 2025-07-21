@@ -8,7 +8,7 @@ function App() {
             className={cn(
                 'flex items-center',
                 'w-dvw max-w-dvw h-dvh max-h-dvh',
-                'bg-stone-400',
+                'bg-stone-300 dark:bg-stone-900',
             )}
         >
             <Page className="grow" />

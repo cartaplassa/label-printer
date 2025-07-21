@@ -21,6 +21,8 @@ const stringifyPaddings = (paddings: Sides<number>, measurementUnit: string) =>
 
 interface SheetProps extends ComponentPropsWithoutRef<'div'> {}
 
+const MAX_ITEMS = 4096;
+
 function Sheet({ className, ...rest }: SheetProps) {
     const paperFormat = useConfigStore((state) => state.paperFormat);
     const isPaperRotationAlbum = useConfigStore(
@@ -70,10 +72,11 @@ function Sheet({ className, ...rest }: SheetProps) {
     return (
         <div
             id="PRINTAREA"
-            className={cn('bg-white', className)}
+            className={cn('bg-white dark:bg-stone-700', className)}
             style={{
                 ...paperSize,
                 padding: stringifyPaddings(sheetPaddings, measurementUnit),
+                boxSizing: 'border-box',
             }}
             {...rest}
         >
@@ -86,37 +89,42 @@ function Sheet({ className, ...rest }: SheetProps) {
             >
                 {columns > 0 &&
                     rows > 0 &&
-                    [...Array(columns * rows).keys()].map((i) => (
-                        <div
-                            key={i}
-                            style={{
-                                width: labelWidth + measurementUnit,
-                                height: labelHeight + measurementUnit,
-                                maxWidth: labelWidth + measurementUnit,
-                                maxHeight: labelHeight + measurementUnit,
-                                padding: stringifyPaddings(
-                                    labelPaddings,
-                                    measurementUnit,
-                                ),
-                                boxSizing: 'border-box',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            {!isPaddingOverflow && (
-                                <img
-                                    //NOTE - Tailwind won't work in separate window
+                    [...Array(Math.min(columns * rows, MAX_ITEMS)).keys()].map(
+                        (i) =>
+                            labelWidth > 0 &&
+                            labelHeight > 0 && (
+                                <div
+                                    key={i}
                                     style={{
-                                        // TODO 'object-scale-down' conditionally
-                                        objectFit: 'contain',
-                                        width: '100%',
-                                        height: '100%',
+                                        width: labelWidth + measurementUnit,
+                                        height: labelHeight + measurementUnit,
+                                        maxWidth: labelWidth + measurementUnit,
+                                        maxHeight:
+                                            labelHeight + measurementUnit,
+                                        padding: stringifyPaddings(
+                                            labelPaddings,
+                                            measurementUnit,
+                                        ),
+                                        boxSizing: 'border-box',
+                                        overflow: 'hidden',
                                     }}
-                                    src={label}
-                                    alt="Label"
-                                />
-                            )}
-                        </div>
-                    ))}
+                                >
+                                    {!isPaddingOverflow && (
+                                        <img
+                                            //NOTE - Tailwind won't work in separate window
+                                            style={{
+                                                // TODO 'object-scale-down' conditionally
+                                                objectFit: 'contain',
+                                                width: '100%',
+                                                height: '100%',
+                                            }}
+                                            src={label}
+                                            alt="Label"
+                                        />
+                                    )}
+                                </div>
+                            ),
+                    )}
             </div>
         </div>
     );

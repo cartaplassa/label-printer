@@ -7,6 +7,7 @@ import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
 import RepoLink from '@/components/RepoLink';
 import PrintButton from '@/components/PrintButton';
 import type { ComponentPropsWithoutRef } from 'react';
+import ReloadFrame from '@/components/ReloadFrame';
 
 interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
 
@@ -36,6 +37,7 @@ function Settings({ className, ...rest }: SettingsProps) {
                 <ThemeToggle />
                 <RepoLink />
             </div>
+            <ReloadFrame />
             <PaperFormatSelector
                 className="w-full"
                 value={paperFormat}

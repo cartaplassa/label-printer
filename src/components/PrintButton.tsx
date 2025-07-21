@@ -5,13 +5,13 @@ const PrintButton = () => {
     return (
         <Button
             onClick={() => {
-                let printableAreaContent =
-                    document.getElementById('PRINTAREA')?.innerHTML;
-                if (!printableAreaContent) return;
+                let printableArea = document.getElementById('PRINTAREA');
+                if (!printableArea) return;
                 const popup = window.open();
                 if (!popup) return;
-                popup.document.body.innerHTML = printableAreaContent;
-                popup.document.body.style = 'margin: 0'; // TODO Full CSS reset
+                popup.document.body.innerHTML = printableArea.innerHTML;
+                console.log(printableArea.style);
+                popup.document.body.style = `${printableArea.style.cssText} margin: 0`;
                 popup.print();
                 popup.close();
             }}
