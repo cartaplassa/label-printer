@@ -5,7 +5,7 @@ const PrintButton = () => {
     return (
         <Button
             onClick={() => {
-                let printableArea = document.getElementById('PRINTAREA');
+                const printableArea = document.getElementById('PRINTAREA');
                 if (!printableArea) return;
                 const popup = window.open();
                 if (!popup) return;

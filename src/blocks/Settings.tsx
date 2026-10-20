@@ -2,7 +2,6 @@ import cn from '@/cn';
 import useConfigStore, { PAPER_FORMAT_DIMENSIONS } from '@/store';
 import PaperFormatSelector from '@/components/Settings/PaperFormatSelector';
 import ThemeToggle from '@/components/ThemeToggle';
-import FilePickerTrigger from '@/components/Settings/FilePickerTrigger';
 import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
 import RepoLink from '@/components/RepoLink';
 import PrintButton from '@/components/PrintButton';
@@ -28,7 +27,7 @@ function Settings({ className, ...rest }: SettingsProps) {
             className={cn(
                 'border border-stone-500 p-2 rounded-md',
                 'bg-background',
-                'flex flex-col gap-2',
+                'flex flex-col gap-2 min-w-md',
                 className,
             )}
             {...rest}
@@ -64,7 +63,6 @@ function Settings({ className, ...rest }: SettingsProps) {
                     )}
                 </Button>
             </div>
-            <FilePickerTrigger />
             <PositionsAccordion paperFormat={paperFormat} />
         </div>
     );

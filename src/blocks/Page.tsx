@@ -45,10 +45,14 @@ function Sheet({ className, ...rest }: SheetProps) {
               height: `${sheetHeight}${measurementUnit}`,
           };
     const sheetPaddings = useConfigStore((state) => state.sheetPaddings);
-    const label = useConfigStore((state) => state.label);
+    const labelType = useConfigStore((state) => state.labelType);
+    const labelText = useConfigStore((state) => state.labelText);
+    const labelImage = useConfigStore((state) => state.labelImage);
     const labelWidth = useConfigStore((state) => state.labelWidth);
     const labelHeight = useConfigStore((state) => state.labelHeight);
     const labelPaddings = useConfigStore((state) => state.labelPaddings);
+    const labelTextSize = useConfigStore((state) => state.labelTextSize);
+    const labelBorderWidth = useConfigStore((state) => state.labelBorderWidth);
     const isPaddingOverflow =
         labelWidth <= labelPaddings.left + labelPaddings.right ||
         labelHeight <= labelPaddings.top + labelPaddings.bottom;
@@ -85,6 +89,7 @@ function Sheet({ className, ...rest }: SheetProps) {
                     display: 'grid',
                     gridTemplateColumns: `repeat(${columns}, ${labelWidth + measurementUnit})`,
                     gridTemplateRows: `repeat(${rows}, ${labelHeight + measurementUnit})`,
+                    fontSize: labelTextSize,
                 }}
             >
                 {columns > 0 &&
@@ -94,6 +99,7 @@ function Sheet({ className, ...rest }: SheetProps) {
                             labelWidth > 0 &&
                             labelHeight > 0 && (
                                 <div
+                                    className="CELL"
                                     key={i}
                                     style={{
                                         width: labelWidth + measurementUnit,
@@ -107,21 +113,29 @@ function Sheet({ className, ...rest }: SheetProps) {
                                         ),
                                         boxSizing: 'border-box',
                                         overflow: 'hidden',
+                                        borderWidth: labelBorderWidth
+                                            ? `${labelBorderWidth}px`
+                                            : 0,
+                                        borderColor: 'black',
+                                        borderStyle: 'solid',
                                     }}
                                 >
-                                    {!isPaddingOverflow && (
-                                        <img
-                                            //NOTE - Tailwind won't work in separate window
-                                            style={{
-                                                // TODO 'object-scale-down' conditionally
-                                                objectFit: 'contain',
-                                                width: '100%',
-                                                height: '100%',
-                                            }}
-                                            src={label}
-                                            alt="Label"
-                                        />
-                                    )}
+                                    {!isPaddingOverflow &&
+                                        (labelType === 'image' ? (
+                                            <img
+                                                //NOTE - Tailwind won't work in separate window
+                                                style={{
+                                                    // TODO 'object-scale-down' conditionally
+                                                    objectFit: 'contain',
+                                                    width: '100%',
+                                                    height: '100%',
+                                                }}
+                                                src={labelImage}
+                                                alt="Label"
+                                            />
+                                        ) : (
+                                            <p>{labelText}</p>
+                                        ))}
                                 </div>
                             ),
                     )}

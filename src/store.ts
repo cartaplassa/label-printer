@@ -27,6 +27,12 @@ export type MeasurementUnit = Pick<
 >;
 
 export type Side = 'top' | 'right' | 'bottom' | 'left';
+export const sideToDimension: Record<Side, 'width' | 'height'> = {
+    top: 'height',
+    bottom: 'height',
+    left: 'width',
+    right: 'width',
+};
 export type Sides<T> = Record<Side, T>;
 //  {
 //     "top": T,
@@ -34,15 +40,25 @@ export type Sides<T> = Record<Side, T>;
 //     "bottom": T,
 //     "left": T,
 // }
+type LabelType = 'text' | 'image';
 
 type Config = {
     paperFormat: PaperFormat;
     setPaperFormat: (paperFormat: PaperFormat) => void;
     isPaperRotationAlbum: boolean;
     togglePaperRotation: () => void;
-    label: string;
-    setLabel: (newLabel: string) => void;
-    resetLabel: () => void;
+    labelType: LabelType;
+    setLabelType: (newValue: LabelType) => void;
+    toggleLabelType: () => void;
+    labelBorderWidth: number;
+    setLabelBorderWidth: (newValue: number) => void;
+    labelText: string;
+    setLabelText: (newLabel: string) => void;
+    labelTextSize: number;
+    setLabelTextSize: (newSize: number) => void;
+    labelImage: string;
+    setLabelImage: (newLabel: string) => void;
+    resetLabelImage: () => void;
     sheetPaddings: Sides<number>;
     setSheetPadding: (type: Side, newValue: number) => void;
     labelWidth: number;
@@ -66,15 +82,44 @@ const useConfigStore = create<Config>()(
                 set((draft) => {
                     draft.isPaperRotationAlbum = !draft.isPaperRotationAlbum;
                 }),
-            label: exampleImage,
-            setLabel: (newLabel: string) =>
+            labelType: 'image',
+            setLabelType: (newValue: LabelType) =>
+                set((draft) => {
+                    console.log(newValue);
+                    draft.labelType = newValue;
+                }),
+            toggleLabelType: () =>
+                set((draft) => {
+                    if (draft.labelType === 'image') {
+                        draft.labelType = 'text';
+                        return;
+                    }
+                    draft.labelType = 'image';
+                }),
+            labelBorderWidth: 1,
+            setLabelBorderWidth: (newValue: number) =>
+                set((draft) => {
+                    draft.labelBorderWidth = newValue;
+                }),
+            labelText: '',
+            setLabelText: (newValue: string) =>
+                set((draft) => {
+                    draft.labelText = newValue;
+                }),
+            labelTextSize: 16,
+            setLabelTextSize: (newSize: number) =>
+                set((draft) => {
+                    draft.labelTextSize = newSize;
+                }),
+            labelImage: exampleImage,
+            setLabelImage: (newLabel: string) =>
                 set((draft) => {
                     console.log(newLabel);
-                    draft.label = newLabel;
+                    draft.labelImage = newLabel;
                 }),
-            resetLabel: () =>
+            resetLabelImage: () =>
                 set((draft) => {
-                    draft.label = exampleLabel;
+                    draft.labelImage = exampleLabel;
                 }),
             sheetPaddings: {
                 top: 0.1,
