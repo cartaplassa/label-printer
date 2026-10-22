@@ -84,6 +84,34 @@ function Sheet({ className, ...rest }: SheetProps) {
             }}
             {...rest}
         >
+            <style>{`
+            .CELL {
+                width: ${labelWidth + measurementUnit};
+                height: ${labelHeight + measurementUnit};
+                max-width: ${labelWidth + measurementUnit};
+                max-height: ${labelHeight + measurementUnit};
+                padding: ${stringifyPaddings(labelPaddings, measurementUnit)};
+                box-sizing: border-box;
+                overflow: hidden;
+                border-width: ${labelBorderWidth ? labelBorderWidth + measurementUnit : 0};
+                border-color: black;
+                border-style: solid;
+            }
+
+            .CELL p {
+                margin-block-start: 0;
+                margin-block-end: 0;
+                line-height: 1.5;
+            }
+
+            .CELL .SERIAL-IMAGE {
+                -webkit-print-color-adjust: exact;
+                object-fit: contain;
+                background: no-repeat center/contain url("${labelImage}");
+                width: 100%;
+                height: 100%;
+            }
+            `}</style>
             <div
                 style={{
                     display: 'grid',
@@ -98,41 +126,10 @@ function Sheet({ className, ...rest }: SheetProps) {
                         (i) =>
                             labelWidth > 0 &&
                             labelHeight > 0 && (
-                                <div
-                                    className="CELL"
-                                    key={i}
-                                    style={{
-                                        width: labelWidth + measurementUnit,
-                                        height: labelHeight + measurementUnit,
-                                        maxWidth: labelWidth + measurementUnit,
-                                        maxHeight:
-                                            labelHeight + measurementUnit,
-                                        padding: stringifyPaddings(
-                                            labelPaddings,
-                                            measurementUnit,
-                                        ),
-                                        boxSizing: 'border-box',
-                                        overflow: 'hidden',
-                                        borderWidth: labelBorderWidth
-                                            ? `${labelBorderWidth}px`
-                                            : 0,
-                                        borderColor: 'black',
-                                        borderStyle: 'solid',
-                                    }}
-                                >
+                                <div className="CELL" key={i}>
                                     {!isPaddingOverflow &&
                                         (labelType === 'image' ? (
-                                            <img
-                                                //NOTE - Tailwind won't work in separate window
-                                                style={{
-                                                    // TODO 'object-scale-down' conditionally
-                                                    objectFit: 'contain',
-                                                    width: '100%',
-                                                    height: '100%',
-                                                }}
-                                                src={labelImage}
-                                                alt="Label"
-                                            />
+                                            <div className="SERIAL-IMAGE" />
                                         ) : (
                                             <p>{labelText}</p>
                                         ))}

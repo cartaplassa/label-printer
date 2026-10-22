@@ -54,7 +54,7 @@ export function LabelItem() {
                 value={labelBorderWidth}
                 setValue={setLabelBorderWidth}
                 max={10}
-                step={0.1}
+                step={0.01}
             />
         </PositionsAccordionItem>
     );
