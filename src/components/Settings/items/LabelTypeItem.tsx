@@ -6,7 +6,7 @@ import { Field, FieldContent } from '@/components/ui/field';
 import { NumberSetter } from '@/components/NumberSetter';
 import { PositionsAccordionItem } from '@/components/Settings/PositionsAccordionItem';
 
-export function LabelItem() {
+export function LabelTypeItem() {
     const labelType = useConfigStore((state) => state.labelType);
     const setLabelType = useConfigStore((state) => state.setLabelType);
     const labelText = useConfigStore((state) => state.labelText);
