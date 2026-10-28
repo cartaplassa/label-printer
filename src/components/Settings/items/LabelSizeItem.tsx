@@ -1,28 +1,28 @@
-import useConfigStore, { PAPER_FORMAT_DIMENSIONS } from '@/store';
 import { NumberSetter } from '@/components/NumberSetter';
+import { useConfigStore, useLabel, usePaperSize } from '@/store';
 import { PositionsAccordionItem } from '../PositionsAccordionItem';
 
 export function LabelSizeItem() {
-    const paperFormat = useConfigStore((state) => state.paperFormat);
-    const labelWidth = useConfigStore((state) => state.labelWidth);
-    const setLabelWidth = useConfigStore((state) => state.setLabelWidth);
-    const labelHeight = useConfigStore((state) => state.labelHeight);
-    const setLabelHeight = useConfigStore((state) => state.setLabelHeight);
+    const { width, height } = useLabel();
+    const { width: paperWidth, height: paperHeight, unit } = usePaperSize();
+    const updateLabel = useConfigStore((state) => state.updateLabel);
 
     return (
         <PositionsAccordionItem value="label-size" title="Label size" isGrid>
             <NumberSetter
                 isSubgrid
-                value={labelWidth}
-                setValue={setLabelWidth}
-                max={PAPER_FORMAT_DIMENSIONS[paperFormat].width}
+                value={width}
+                setValue={(newWidth) => updateLabel({ width: newWidth })}
+                max={paperWidth}
+                unit={unit}
                 label="Width"
             />
             <NumberSetter
                 isSubgrid
-                value={labelHeight}
-                setValue={setLabelHeight}
-                max={PAPER_FORMAT_DIMENSIONS[paperFormat].height}
+                value={height}
+                setValue={(newHeight) => updateLabel({ height: newHeight })}
+                max={paperHeight}
+                unit={unit}
                 label="Height"
             />
         </PositionsAccordionItem>

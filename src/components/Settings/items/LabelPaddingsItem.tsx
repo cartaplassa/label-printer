@@ -1,14 +1,14 @@
 import { NumberSetter } from '@/components/NumberSetter';
-import { PositionsAccordionItem } from '../PositionsAccordionItem';
-import { typedKeys } from '@/lib/typedKeys';
+import { paddingLimit } from '@/domain/config';
+import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
-import useConfigStore, { Side } from '@/store';
+import { useConfigStore, useLabel, usePaperSize } from '@/store';
+import { PositionsAccordionItem } from '../PositionsAccordionItem';
 
 export function LabelPaddingsItem() {
-    const labelPaddings = useConfigStore((state) => state.labelPaddings);
+    const label = useLabel();
+    const { unit } = usePaperSize();
     const setLabelPadding = useConfigStore((state) => state.setLabelPadding);
-    const labelWidth = useConfigStore((state) => state.labelWidth);
-    const labelHeight = useConfigStore((state) => state.labelHeight);
 
     return (
         <PositionsAccordionItem
@@ -16,21 +16,15 @@ export function LabelPaddingsItem() {
             title="Label paddings"
             isGrid
         >
-            {typedKeys(labelPaddings).map((k: Side) => (
+            {SIDES.map((side) => (
                 <NumberSetter
                     isSubgrid
-                    key={k}
-                    value={labelPaddings[k]}
-                    setValue={(newValue) => setLabelPadding(k, newValue)}
-                    max={
-                        {
-                            top: labelHeight,
-                            bottom: labelHeight,
-                            left: labelWidth,
-                            right: labelWidth,
-                        }[k]
-                    }
-                    label={capitalize(k)}
+                    key={side}
+                    value={label.paddings[side]}
+                    setValue={(newValue) => setLabelPadding(side, newValue)}
+                    max={paddingLimit(side, label.width, label.height)}
+                    unit={unit}
+                    label={capitalize(side)}
                 />
             ))}
         </PositionsAccordionItem>

@@ -1,33 +1,30 @@
-import useConfigStore, {
-    PAPER_FORMAT_DIMENSIONS,
-    Side,
-    sideToDimension,
-} from '@/store';
 import { NumberSetter } from '@/components/NumberSetter';
-import { PositionsAccordionItem } from '../PositionsAccordionItem';
+import { paddingLimit } from '@/domain/config';
+import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
-import { typedKeys } from '@/lib/typedKeys';
+import { useConfigStore, usePaperSize, useSheet } from '@/store';
+import { PositionsAccordionItem } from '../PositionsAccordionItem';
 
 export function SheetPaddingsItem() {
-    const paperFormat = useConfigStore((state) => state.paperFormat);
-    const sheetPaddings = useConfigStore((state) => state.sheetPaddings);
+    const { paddings } = useSheet();
+    const { width, height, unit } = usePaperSize();
     const setSheetPadding = useConfigStore((state) => state.setSheetPadding);
+
     return (
         <PositionsAccordionItem
             value="sheet-paddings"
             title="Sheet paddings"
             isGrid
         >
-            {typedKeys(sheetPaddings).map((k: Side) => (
+            {SIDES.map((side) => (
                 <NumberSetter
                     isSubgrid
-                    key={k}
-                    value={sheetPaddings[k]}
-                    setValue={(newValue) => setSheetPadding(k, newValue)}
-                    max={
-                        PAPER_FORMAT_DIMENSIONS[paperFormat][sideToDimension[k]]
-                    }
-                    label={capitalize(k)}
+                    key={side}
+                    value={paddings[side]}
+                    setValue={(newValue) => setSheetPadding(side, newValue)}
+                    max={paddingLimit(side, width, height)}
+                    unit={unit}
+                    label={capitalize(side)}
                 />
             ))}
         </PositionsAccordionItem>

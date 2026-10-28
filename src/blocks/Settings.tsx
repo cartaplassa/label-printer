@@ -1,26 +1,22 @@
-import cn from '@/cn';
-import useConfigStore, { PAPER_FORMAT_DIMENSIONS } from '@/store';
-import PaperFormatSelector from '@/components/Settings/PaperFormatSelector';
-import ThemeToggle from '@/components/ThemeToggle';
-import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
-import RepoLink from '@/components/RepoLink';
-import PrintButton from '@/components/PrintButton';
-import type { ComponentPropsWithoutRef } from 'react';
-import ReloadFrame from '@/components/ReloadFrame';
-import { Button } from '@/components/ui/button';
 import { RotateCcwSquare, RotateCwSquare } from 'lucide-react';
+import type { ComponentPropsWithoutRef } from 'react';
+import cn from '@/cn';
+import PrintButton from '@/components/PrintButton';
+import ReloadFrame from '@/components/ReloadFrame';
+import RepoLink from '@/components/RepoLink';
+import PaperFormatSelector from '@/components/Settings/PaperFormatSelector';
+import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
+import ThemeToggle from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { PAPER_FORMAT_KEYS } from '@/domain/paper';
+import { useConfigStore, useSheet } from '@/store';
 
 interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
 
 function Settings({ className, ...rest }: SettingsProps) {
-    const paperFormat = useConfigStore((state) => state.paperFormat);
+    const { format, landscape } = useSheet();
     const setPaperFormat = useConfigStore((state) => state.setPaperFormat);
-    const isPaperRotationAlbum = useConfigStore(
-        (state) => state.isPaperRotationAlbum,
-    );
-    const togglePaperRotation = useConfigStore(
-        (state) => state.togglePaperRotation,
-    );
+    const toggleLandscape = useConfigStore((state) => state.toggleLandscape);
 
     return (
         <div
@@ -48,22 +44,18 @@ function Settings({ className, ...rest }: SettingsProps) {
             <div className="flex gap-2 items-center">
                 <PaperFormatSelector
                     className="w-full"
-                    value={paperFormat}
+                    value={format}
                     onValueChange={setPaperFormat}
-                    options={Object.keys(PAPER_FORMAT_DIMENSIONS)}
+                    options={PAPER_FORMAT_KEYS}
                 />
                 <Button
-                    onClick={togglePaperRotation}
-                    variant={isPaperRotationAlbum ? 'default' : 'outline'}
+                    onClick={toggleLandscape}
+                    variant={landscape ? 'default' : 'outline'}
                 >
-                    {isPaperRotationAlbum ? (
-                        <RotateCwSquare />
-                    ) : (
-                        <RotateCcwSquare />
-                    )}
+                    {landscape ? <RotateCwSquare /> : <RotateCcwSquare />}
                 </Button>
             </div>
-            <PositionsAccordion paperFormat={paperFormat} />
+            <PositionsAccordion />
         </div>
     );
 }

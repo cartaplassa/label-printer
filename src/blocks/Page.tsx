@@ -1,141 +1,50 @@
-import cn from '@/cn';
-import useConfigStore, {
-    PAPER_FORMAT_DIMENSIONS,
-    type Side,
-    type Sides,
-} from '../store';
-import {
-    TransformWrapper,
-    TransformComponent,
-    useControls,
-} from 'react-zoom-pan-pinch';
 import type { ClassValue } from 'clsx';
-import { Button } from '@/components/ui/button';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
-
-const stringifyPaddings = (paddings: Sides<number>, measurementUnit: string) =>
-    Object.keys(paddings)
-        .map((side) => String(paddings[side as Side]) + measurementUnit)
-        .join(' ');
+import {
+    TransformComponent,
+    TransformWrapper,
+    useControls,
+} from 'react-zoom-pan-pinch';
+import cn from '@/cn';
+import { Button } from '@/components/ui/button';
+import { formatLength, formatSides } from '@/domain/paper';
+import { buildPrintCss } from '@/domain/printCss';
+import { useGridLayout, useLabel, useSheet } from '@/store';
 
 interface SheetProps extends ComponentPropsWithoutRef<'div'> {}
 
-const MAX_ITEMS = 4096;
-
 function Sheet({ className, ...rest }: SheetProps) {
-    const paperFormat = useConfigStore((state) => state.paperFormat);
-    const isPaperRotationAlbum = useConfigStore(
-        // TODO finish that
-        (state) => state.isPaperRotationAlbum,
-    );
-    const {
-        width: sheetWidth,
-        height: sheetHeight,
-        unit: measurementUnit,
-    } = PAPER_FORMAT_DIMENSIONS[paperFormat];
-
-    const paperSize = isPaperRotationAlbum
-        ? {
-              width: `${sheetHeight}${measurementUnit}`,
-              height: `${sheetWidth}${measurementUnit}`,
-          }
-        : {
-              width: `${sheetWidth}${measurementUnit}`,
-              height: `${sheetHeight}${measurementUnit}`,
-          };
-    const sheetPaddings = useConfigStore((state) => state.sheetPaddings);
-    const labelType = useConfigStore((state) => state.labelType);
-    const labelText = useConfigStore((state) => state.labelText);
-    const labelImage = useConfigStore((state) => state.labelImage);
-    const labelWidth = useConfigStore((state) => state.labelWidth);
-    const labelHeight = useConfigStore((state) => state.labelHeight);
-    const labelPaddings = useConfigStore((state) => state.labelPaddings);
-    const labelTextSize = useConfigStore((state) => state.labelTextSize);
-    const labelBorderWidth = useConfigStore((state) => state.labelBorderWidth);
-    const isPaddingOverflow =
-        labelWidth <= labelPaddings.left + labelPaddings.right ||
-        labelHeight <= labelPaddings.top + labelPaddings.bottom;
-    const columns = Math.floor(
-        (PAPER_FORMAT_DIMENSIONS[paperFormat][
-            !isPaperRotationAlbum ? 'width' : 'height'
-        ] -
-            sheetPaddings.left -
-            sheetPaddings.right) /
-            labelWidth,
-    );
-    const rows = Math.floor(
-        (PAPER_FORMAT_DIMENSIONS[paperFormat][
-            !isPaperRotationAlbum ? 'height' : 'width'
-        ] -
-            sheetPaddings.top -
-            sheetPaddings.bottom) /
-            labelHeight,
-    );
+    const label = useLabel();
+    const sheet = useSheet();
+    const layout = useGridLayout();
+    const { paper, cellCount, paddingOverflows } = layout;
 
     return (
         <div
             id="PRINTAREA"
             className={cn('bg-white dark:bg-stone-700', className)}
             style={{
-                ...paperSize,
-                padding: stringifyPaddings(sheetPaddings, measurementUnit),
+                width: formatLength(paper.width, paper.unit),
+                height: formatLength(paper.height, paper.unit),
+                padding: formatSides(sheet.paddings, paper.unit),
                 boxSizing: 'border-box',
             }}
             {...rest}
         >
-            <style>{`
-            .CELL {
-                width: ${labelWidth + measurementUnit};
-                height: ${labelHeight + measurementUnit};
-                max-width: ${labelWidth + measurementUnit};
-                max-height: ${labelHeight + measurementUnit};
-                padding: ${stringifyPaddings(labelPaddings, measurementUnit)};
-                box-sizing: border-box;
-                overflow: hidden;
-                border-width: ${labelBorderWidth ? labelBorderWidth + measurementUnit : 0};
-                border-color: black;
-                border-style: solid;
-            }
-
-            .CELL p {
-                margin-block-start: 0;
-                margin-block-end: 0;
-                line-height: 1.5;
-            }
-
-            .CELL .SERIAL-IMAGE {
-                -webkit-print-color-adjust: exact;
-                object-fit: contain;
-                background: no-repeat center/contain url("${labelImage}");
-                width: 100%;
-                height: 100%;
-            }
-            `}</style>
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: `repeat(${columns}, ${labelWidth + measurementUnit})`,
-                    gridTemplateRows: `repeat(${rows}, ${labelHeight + measurementUnit})`,
-                    fontSize: labelTextSize,
-                }}
-            >
-                {columns > 0 &&
-                    rows > 0 &&
-                    [...Array(Math.min(columns * rows, MAX_ITEMS)).keys()].map(
-                        (i) =>
-                            labelWidth > 0 &&
-                            labelHeight > 0 && (
-                                <div className="CELL" key={i}>
-                                    {!isPaddingOverflow &&
-                                        (labelType === 'image' ? (
-                                            <div className="SERIAL-IMAGE" />
-                                        ) : (
-                                            <p>{labelText}</p>
-                                        ))}
-                                </div>
-                            ),
-                    )}
+            <style>{buildPrintCss({ label, sheet, layout })}</style>
+            <div className="GRID">
+                {Array.from({ length: cellCount }, (_, i) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: the grid has no stable per-cell identity
+                    <div className="CELL" key={i}>
+                        {!paddingOverflows &&
+                            (label.type === 'image' ? (
+                                <div className="SERIAL-IMAGE" />
+                            ) : (
+                                <p>{label.text}</p>
+                            ))}
+                    </div>
+                ))}
             </div>
         </div>
     );

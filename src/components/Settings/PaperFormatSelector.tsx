@@ -1,3 +1,6 @@
+import type { ClassValue } from 'clsx';
+import type { ComponentPropsWithoutRef } from 'react';
+import cn from '@/cn';
 import {
     Select,
     SelectContent,
@@ -6,15 +9,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-
-import cn from '@/cn';
-import type { ClassValue } from 'clsx';
-import type { ComponentPropsWithoutRef } from 'react';
+import { isPaperFormat, PAPER_FORMATS, type PaperFormat } from '@/domain/paper';
 
 interface PaperFormatSelectorProps
-    extends ComponentPropsWithoutRef<typeof Select> {
+    extends Omit<
+        ComponentPropsWithoutRef<typeof Select>,
+        'value' | 'onValueChange'
+    > {
     className?: ClassValue;
-    options: string[];
+    value: PaperFormat;
+    onValueChange: (value: PaperFormat) => void;
+    options: readonly PaperFormat[];
 }
 
 function PaperFormatSelector({
@@ -25,17 +30,27 @@ function PaperFormatSelector({
     ...rest
 }: PaperFormatSelectorProps) {
     return (
-        <Select {...{ value, onValueChange, ...rest }}>
+        <Select
+            {...rest}
+            value={value}
+            onValueChange={(next) => {
+                if (isPaperFormat(next)) onValueChange(next);
+            }}
+        >
             <SelectTrigger className={cn('', className)}>
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
                 <SelectGroup>
-                    {options.map((i) => (
-                        <SelectItem key={i} value={i}>
-                            {i}
-                        </SelectItem>
-                    ))}
+                    {options.map((format) => {
+                        const { width, height, unit } = PAPER_FORMATS[format];
+
+                        return (
+                            <SelectItem key={format} value={format}>
+                                {format} · {width} × {height} {unit}
+                            </SelectItem>
+                        );
+                    })}
                 </SelectGroup>
             </SelectContent>
         </Select>
