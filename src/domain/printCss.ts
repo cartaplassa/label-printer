@@ -37,6 +37,7 @@ export function buildPrintCss({
                 box-sizing: border-box;
                 overflow: hidden;
                 outline-width: ${borderWidth(label.borderWidth)};
+                outline-offset: -${borderWidth(label.borderWidth)};
                 outline-color: black;
                 outline-style: solid;
             }
