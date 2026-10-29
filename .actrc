@@ -1,0 +1,5 @@
+# Local CI defaults for nektos/act (https://nektosact.com).
+# Merged with ~/.config/act/actrc and ~/.actrc; this file wins.
+# CLI flags always override.
+-P ubuntu-latest=catthehacker/ubuntu:act-24.04
+--container-architecture linux/amd64
