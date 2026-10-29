@@ -1,12 +1,12 @@
-import { type ComponentPropsWithoutRef, useEffect, useState } from 'react';
-import cn from '@/cn';
+import { type ComponentPropsWithoutRef } from 'react';
+import { cn } from '@/lib/cn';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
-import type { Unit } from '@/domain/paper';
 
 interface NumberSetterProps extends ComponentPropsWithoutRef<'div'> {
     value: number;
     setValue: (newValue: number) => void;
+    min?: number;
     max: number;
     label: string;
     step?: number;
@@ -19,6 +19,7 @@ export function NumberSetter({
     className,
     value,
     setValue,
+    min = 0,
     max,
     label,
     step = 0.01,
@@ -27,13 +28,6 @@ export function NumberSetter({
     unit,
     ...rest
 }: NumberSetterProps) {
-    const [text, setText] = useState(() => String(value));
-    const [isFocused, setIsFocused] = useState(false);
-
-    useEffect(() => {
-        if (!isFocused) setText(String(value));
-    }, [value, isFocused]);
-
     return (
         <div
             className={cn(
@@ -52,28 +46,24 @@ export function NumberSetter({
             </span>
             <Slider
                 disabled={disabled}
-                value={[value]}
-                onValueChange={(newValue) => setValue(newValue[0])}
-                min={0}
+                value={value}
+                onValueChange={(newValue) =>
+                    setValue(Array.isArray(newValue) ? newValue[0] : newValue)
+                }
+                min={min}
                 max={max}
                 step={step}
-                className="grow"
+                className="grow w-full h-1.5"
+                orientation="horizontal"
             />
             <Input
                 className="min-w-24 max-w-24"
                 disabled={disabled}
                 type="number"
                 step={step}
-                value={text}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => {
-                    setIsFocused(false);
-                    setText(String(value));
-                }}
+                value={value}
                 onChange={(event) => {
-                    setText(event.target.value);
-                    const next = event.target.valueAsNumber;
-                    if (Number.isFinite(next)) setValue(next);
+                    setValue(Number(event.target.value));
                 }}
             />
         </div>

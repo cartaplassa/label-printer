@@ -1,6 +1,6 @@
 import type { ClassValue } from 'clsx';
 import type { ComponentPropsWithoutRef } from 'react';
-import cn from '@/cn';
+import { cn } from '@/lib/cn';
 import {
     Select,
     SelectContent,

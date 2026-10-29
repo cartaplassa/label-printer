@@ -5,15 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldContent } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import {
-    BORDER_WIDTH_MAX,
-    isLabelType,
-    TEXT_SIZE_MAX,
-    TextAlign,
-} from '@/domain/config';
+import { BORDER_WIDTH_MAX, isLabelType, TEXT_SIZE_MAX } from '@/domain/config';
 import { useConfigStore, useLabel } from '@/store';
 import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react';
-import { ReactNode } from 'react';
 
 export function LabelTypeItem() {
     const label = useLabel();

@@ -12,7 +12,7 @@ export function LabelSizeItem() {
             <NumberSetter
                 isSubgrid
                 value={width}
-                setValue={(newWidth) => updateLabel({ width: newWidth })}
+                setValue={(width) => updateLabel({ width })}
                 max={paperWidth}
                 unit={unit}
                 label="Width"
@@ -20,7 +20,7 @@ export function LabelSizeItem() {
             <NumberSetter
                 isSubgrid
                 value={height}
-                setValue={(newHeight) => updateLabel({ height: newHeight })}
+                setValue={(height) => updateLabel({ height })}
                 max={paperHeight}
                 unit={unit}
                 label="Height"

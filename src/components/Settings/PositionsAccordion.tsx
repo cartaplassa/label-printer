@@ -7,12 +7,7 @@ import { SheetGapItem } from './items/SheetGapItem';
 
 export function PositionsAccordion() {
     return (
-        <Accordion
-            type="single"
-            collapsible
-            className="w-full"
-            defaultValue="sheet-paddings"
-        >
+        <Accordion className="w-full" defaultValue={['label']}>
             <LabelTypeItem />
             <SheetPaddingsItem />
             <SheetGapItem />

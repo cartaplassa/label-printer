@@ -1,8 +1,8 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from './ThemeProvider';
-import cn from '@/cn';
 import type { ComponentPropsWithoutRef } from 'react';
+import { cn } from '@/lib/cn';
 
 interface ThemeToggleProps extends ComponentPropsWithoutRef<typeof Button> {}
 

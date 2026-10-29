@@ -1,4 +1,4 @@
-import cn from '@/cn';
+import { cn } from '@/lib/cn';
 import Page from './blocks/Page';
 import Settings from './blocks/Settings';
 

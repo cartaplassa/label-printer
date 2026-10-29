@@ -1,6 +1,6 @@
 import { RotateCcwSquare, RotateCwSquare } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
-import cn from '@/cn';
+import { cn } from '@/lib/cn';
 import PrintButton from '@/components/PrintButton';
 import ReloadFrame from '@/components/ReloadFrame';
 import RepoLink from '@/components/RepoLink';
