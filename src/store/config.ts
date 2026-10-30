@@ -77,8 +77,13 @@ function migrateConfig(persisted: unknown, version: number): Config {
         label: {
             type: old.labelType ?? defaults.label.type,
             image: old.labelImage ?? defaults.label.image,
+            fontFamily: defaults.label.fontFamily,
+            fontWeight: defaults.label.fontWeight,
+            lineHeight: defaults.label.lineHeight,
+            letterSpacing: defaults.label.letterSpacing,
             text: old.labelText ?? defaults.label.text,
             textAlign: defaults.label.textAlign,
+            textWrap: defaults.label.textWrap,
             textSize: old.labelTextSize ?? defaults.label.textSize,
             borderWidth: old.labelBorderWidth ?? defaults.label.borderWidth,
             width: old.labelWidth ?? defaults.label.width,

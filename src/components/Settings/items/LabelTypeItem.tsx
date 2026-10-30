@@ -1,13 +1,35 @@
+import { ExpandableTextarea } from '@/components/ExpandableTextarea';
 import { NumberSetter } from '@/components/NumberSetter';
 import FilePickerTrigger from '@/components/Settings/FilePickerTrigger';
 import { PositionsAccordionItem } from '@/components/Settings/PositionsAccordionItem';
 import { Button } from '@/components/ui/button';
 import { Field, FieldContent } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { BORDER_WIDTH_MAX, isLabelType, TEXT_SIZE_MAX } from '@/domain/config';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    BORDER_WIDTH_MAX,
+    FONT_FAMILIES,
+    FONT_FALLBACK,
+    FONT_WEIGHT_RANGES,
+    isLabelType,
+    TEXT_SIZE_MAX,
+    type FontFamily,
+} from '@/domain/config';
 import { useConfigStore, useLabel } from '@/store';
-import { AlignCenter, AlignLeft, AlignRight } from 'lucide-react';
+import {
+    AlignCenter,
+    AlignLeft,
+    AlignRight,
+    AlignJustify,
+    WrapText,
+} from 'lucide-react';
 
 export function LabelTypeItem() {
     const label = useLabel();
@@ -32,15 +54,40 @@ export function LabelTypeItem() {
                     <RadioGroupItem id="label-type-text" value="text" />
                     <FieldContent>
                         <label htmlFor="label-type-text">Text</label>
-                        <div className="flex gap-2">
-                            <Input
-                                className="grow"
-                                disabled={label.type !== 'text'}
-                                onChange={(event) =>
-                                    updateLabel({ text: event.target.value })
+                        <ExpandableTextarea
+                            className=""
+                            disabled={label.type !== 'text'}
+                            onChange={(event) =>
+                                updateLabel({ text: event.target.value })
+                            }
+                            value={label.text}
+                        />
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="font-family-select">Font</label>
+                            <Select
+                                id="font-family-select"
+                                value={label.fontFamily}
+                                onValueChange={(fontFamily) =>
+                                    updateLabel({
+                                        fontFamily:
+                                            (fontFamily as FontFamily) ??
+                                            FONT_FALLBACK,
+                                    })
                                 }
-                                value={label.text}
-                            />
+                            >
+                                <SelectTrigger className="w-full grow">
+                                    <SelectValue placeholder={FONT_FALLBACK} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        {FONT_FAMILIES.map((font) => (
+                                            <SelectItem key={font} value={font}>
+                                                {font}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
                             <Button
                                 variant={
                                     label.textAlign === 'left'
@@ -77,6 +124,17 @@ export function LabelTypeItem() {
                             >
                                 <AlignRight />
                             </Button>
+                            <Button
+                                onClick={() =>
+                                    updateLabel({ textWrap: !label.textWrap })
+                                }
+                            >
+                                {label.textWrap ? (
+                                    <WrapText />
+                                ) : (
+                                    <AlignJustify />
+                                )}
+                            </Button>
                         </div>
                         <NumberSetter
                             disabled={label.type !== 'text'}
@@ -86,6 +144,45 @@ export function LabelTypeItem() {
                             setValue={(textSize) => updateLabel({ textSize })}
                             max={TEXT_SIZE_MAX}
                             step={0.5}
+                        />
+                        <NumberSetter
+                            value={label.fontWeight}
+                            setValue={(fontWeight) =>
+                                updateLabel({ fontWeight })
+                            }
+                            label="Weight"
+                            step={50}
+                            min={
+                                FONT_WEIGHT_RANGES[
+                                    label.fontFamily ?? FONT_FALLBACK
+                                ][0]
+                            }
+                            max={
+                                FONT_WEIGHT_RANGES[
+                                    label.fontFamily ?? FONT_FALLBACK
+                                ][1]
+                            }
+                        />
+                        <NumberSetter
+                            value={label.lineHeight}
+                            setValue={(lineHeight) =>
+                                updateLabel({ lineHeight })
+                            }
+                            label="Line height"
+                            step={0.05}
+                            min={0.9}
+                            max={2}
+                        />
+                        <NumberSetter
+                            value={label.letterSpacing}
+                            setValue={(letterSpacing) =>
+                                updateLabel({ letterSpacing })
+                            }
+                            unit="em"
+                            label="Spacing"
+                            step={0.01}
+                            min={-0.3}
+                            max={1}
                         />
                     </FieldContent>
                 </Field>

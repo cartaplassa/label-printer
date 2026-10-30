@@ -12,18 +12,37 @@ import {
 } from './paper';
 
 export type LabelType = 'text' | 'image';
-export type TextAlign = 'left' | 'center' | 'right';
-export const TEXT_ALIGN_OPTIONS = [
-    'left',
-    'center',
-    'right',
-] as const satisfies TextAlign[];
+export const TEXT_ALIGN_OPTIONS = ['left', 'center', 'right'] as const;
+export type TextAlign = (typeof TEXT_ALIGN_OPTIONS)[number];
+
+export const FONT_FALLBACK = '<browser default>';
+export const FONT_FAMILY_OPTIONS = {
+    Inter: "'Inter Variable', sans-serif",
+    'JetBrains Mono': "'JetBrains Mono Variable', monospace",
+    'Playfair Display': "'Playfair Display Variable', serif",
+    Oxanium: "'Oxanium Variable', serif",
+    [FONT_FALLBACK]: 'system-ui',
+} as const;
+export type FontFamily = keyof typeof FONT_FAMILY_OPTIONS;
+export const FONT_FAMILIES = Object.keys(FONT_FAMILY_OPTIONS) as FontFamily[];
+export const FONT_WEIGHT_RANGES = {
+    Inter: [100, 900],
+    'JetBrains Mono': [100, 800],
+    'Playfair Display': [400, 900],
+    Oxanium: [200, 800],
+    [FONT_FALLBACK]: [100, 900],
+} as const satisfies Record<FontFamily, [number, number]>;
 
 export interface LabelConfig {
     type: LabelType;
     image: string;
+    fontFamily: FontFamily | null;
+    fontWeight: number;
+    lineHeight: number;
+    letterSpacing: number;
     text: string;
     textAlign: TextAlign;
+    textWrap: boolean;
     textSize: number; // pt
     borderWidth: number; // pt
     width: number; // uom
@@ -59,8 +78,13 @@ const DEFAULT_LABEL_HEIGHT = 1;
 const DEFAULT_PADDING = 0.1;
 const DEFAULT_TEXT_SIZE = 16;
 const DEFAULT_BORDER_WIDTH = 1;
+const DEFAULT_FONT_FAMILY = FONT_FALLBACK;
+const DEFAULT_FONT_WEIGHT = 400;
+const DEFAULT_LINE_HEIGHT = 1.5;
+const DEFAULT_LETTER_SPACING = 0;
 const DEFAULT_TEXT = '';
 const DEFAULT_TEXT_ALIGN = 'center';
+const DEFAULT_TEXT_WRAP = false;
 const DEFAULT_LABEL_TYPE: LabelType = 'image';
 
 export const isLabelType = (value: unknown): value is LabelType =>
@@ -78,8 +102,13 @@ export function createDefaultConfig(): Config {
         label: {
             type: DEFAULT_LABEL_TYPE,
             image: DEFAULT_IMAGE,
+            fontFamily: DEFAULT_FONT_FAMILY,
+            fontWeight: DEFAULT_FONT_WEIGHT,
+            lineHeight: DEFAULT_LINE_HEIGHT,
+            letterSpacing: DEFAULT_LETTER_SPACING,
             text: DEFAULT_TEXT,
             textAlign: DEFAULT_TEXT_ALIGN,
+            textWrap: DEFAULT_TEXT_WRAP,
             textSize: DEFAULT_TEXT_SIZE,
             borderWidth: DEFAULT_BORDER_WIDTH,
             width: DEFAULT_LABEL_WIDTH,
@@ -144,6 +173,12 @@ const mapPaddings = (
     left: fn(paddings.left),
 });
 
+export function fitFontPaddings(val: number, range: [number, number]) {
+    if (val < range[0]) return range[0];
+    if (val > range[1]) return range[1];
+    return val;
+}
+
 export function convertConfigUnits(
     config: Config,
     from: Unit,
@@ -198,15 +233,35 @@ export function normalizeConfig(config: Config): Config {
         labelHeight,
     );
 
+    const fontFamily =
+        label.fontFamily && FONT_FAMILIES.includes(label.fontFamily)
+            ? label.fontFamily
+            : DEFAULT_FONT_FAMILY;
+    const fontWeight = fitFontPaddings(
+        typeof label.fontWeight === 'number' ? label.fontWeight : 400,
+        FONT_WEIGHT_RANGES[fontFamily],
+    );
+
     return {
         label: {
             type: isLabelType(label.type) ? label.type : DEFAULT_LABEL_TYPE,
             image:
                 typeof label.image === 'string' ? label.image : DEFAULT_IMAGE,
+            fontFamily,
+            fontWeight,
+            lineHeight:
+                typeof label.lineHeight === 'number'
+                    ? label.lineHeight
+                    : DEFAULT_LINE_HEIGHT,
+            letterSpacing:
+                typeof label.letterSpacing === 'number'
+                    ? label.letterSpacing
+                    : DEFAULT_LETTER_SPACING,
             text: typeof label.text === 'string' ? label.text : DEFAULT_TEXT,
             textAlign: TEXT_ALIGN_OPTIONS.includes(label.textAlign)
                 ? label.textAlign
                 : DEFAULT_TEXT_ALIGN,
+            textWrap: Boolean(label.textWrap),
             textSize: clamp(
                 numberOr(label.textSize, DEFAULT_TEXT_SIZE),
                 0,

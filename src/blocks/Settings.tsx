@@ -4,12 +4,23 @@ import { cn } from '@/lib/cn';
 import PrintButton from '@/components/PrintButton';
 import ReloadFrame from '@/components/ReloadFrame';
 import RepoLink from '@/components/RepoLink';
-import PaperFormatSelector from '@/components/Settings/PaperFormatSelector';
 import { PositionsAccordion } from '@/components/Settings/PositionsAccordion';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { PAPER_FORMAT_KEYS } from '@/domain/paper';
+import {
+    isPaperFormat,
+    PAPER_FORMAT_KEYS,
+    PAPER_FORMATS,
+} from '@/domain/paper';
 import { useConfigStore, useSheet } from '@/store';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 
 interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
 
@@ -23,7 +34,7 @@ function Settings({ className, ...rest }: SettingsProps) {
             className={cn(
                 'border border-stone-500 p-2 rounded-md',
                 'bg-background',
-                'flex flex-col gap-2 min-w-md',
+                'flex flex-col gap-2 min-w-md max-w-md',
                 className,
             )}
             {...rest}
@@ -42,12 +53,30 @@ function Settings({ className, ...rest }: SettingsProps) {
             </div>
             <ReloadFrame />
             <div className="flex gap-2 items-center">
-                <PaperFormatSelector
-                    className="w-full"
+                <Select
                     value={format}
-                    onValueChange={setPaperFormat}
-                    options={PAPER_FORMAT_KEYS}
-                />
+                    onValueChange={(next) => {
+                        if (isPaperFormat(next)) setPaperFormat(next);
+                    }}
+                >
+                    <SelectTrigger className="w-full grow">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {PAPER_FORMAT_KEYS.map((format) => {
+                                const { width, height, unit } =
+                                    PAPER_FORMATS[format];
+
+                                return (
+                                    <SelectItem key={format} value={format}>
+                                        {format} · {width} × {height} {unit}
+                                    </SelectItem>
+                                );
+                            })}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
                 <Button
                     onClick={toggleLandscape}
                     variant={landscape ? 'default' : 'outline'}

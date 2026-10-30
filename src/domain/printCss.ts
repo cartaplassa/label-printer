@@ -1,4 +1,8 @@
-import type { LabelConfig, SheetConfig } from './config';
+import {
+    FONT_FAMILY_OPTIONS,
+    type LabelConfig,
+    type SheetConfig,
+} from './config';
 import type { GridLayout } from './layout';
 import { formatLength, formatSides } from './paper';
 
@@ -23,7 +27,6 @@ export function buildPrintCss({
             .GRID {
                 display: grid;
                 grid-template-columns: repeat(${layout.columns}, ${width});
-                font-size: ${label.textSize}pt;
                 row-gap: ${formatLength(sheet.gapY, unit)};
                 column-gap: ${formatLength(sheet.gapX, unit)};
             }
@@ -45,8 +48,14 @@ export function buildPrintCss({
             .CELL p {
                 margin-block-start: 0;
                 margin-block-end: 0;
-                line-height: 1.5;
+                line-height: ${label.lineHeight};
+                letter-spacing: ${label.letterSpacing}em;
                 text-align: ${label.textAlign};
+                font-size: ${label.textSize}pt;
+                font-family: ${(label.fontFamily && FONT_FAMILY_OPTIONS?.[label.fontFamily]) ?? 'system-ui'};
+                font-weight: ${label.fontWeight};
+                white-space: pre-wrap;
+                min-width: ${label.textWrap ? 'initial' : 'max-content'};
             }
 
             .CELL .SERIAL-IMAGE {
