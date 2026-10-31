@@ -41,7 +41,7 @@ export function buildPrintCss({
                 overflow: hidden;
                 outline-width: ${borderWidth(label.borderWidth)};
                 outline-offset: -${borderWidth(label.borderWidth)};
-                outline-color: black;
+                outline-color: ${label.borderColor};
                 outline-style: solid;
             }
 
@@ -56,6 +56,7 @@ export function buildPrintCss({
                 font-weight: ${label.fontWeight};
                 white-space: pre-wrap;
                 min-width: ${label.textWrap ? 'initial' : 'max-content'};
+                color: ${label.textColor};
             }
 
             .CELL .SERIAL-IMAGE {

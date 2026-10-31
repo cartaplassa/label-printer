@@ -44,6 +44,8 @@ export interface LabelConfig {
     textAlign: TextAlign;
     textWrap: boolean;
     textSize: number; // pt
+    textColor: string;
+    borderColor: string;
     borderWidth: number; // pt
     width: number; // uom
     height: number; // uom
@@ -85,6 +87,8 @@ const DEFAULT_LETTER_SPACING = 0;
 const DEFAULT_TEXT = '';
 const DEFAULT_TEXT_ALIGN = 'center';
 const DEFAULT_TEXT_WRAP = false;
+const DEFAULT_TEXT_COLOR = '#000000ff';
+const DEFAULT_BORDER_COLOR = '#000000ff';
 const DEFAULT_LABEL_TYPE: LabelType = 'image';
 
 export const isLabelType = (value: unknown): value is LabelType =>
@@ -110,6 +114,8 @@ export function createDefaultConfig(): Config {
             textAlign: DEFAULT_TEXT_ALIGN,
             textWrap: DEFAULT_TEXT_WRAP,
             textSize: DEFAULT_TEXT_SIZE,
+            textColor: DEFAULT_TEXT_COLOR,
+            borderColor: DEFAULT_BORDER_COLOR,
             borderWidth: DEFAULT_BORDER_WIDTH,
             width: DEFAULT_LABEL_WIDTH,
             height: DEFAULT_LABEL_HEIGHT,
@@ -267,6 +273,15 @@ export function normalizeConfig(config: Config): Config {
                 0,
                 TEXT_SIZE_MAX,
             ),
+            // TODO: color hex validation
+            textColor:
+                typeof label.textColor === 'string'
+                    ? label.textColor
+                    : DEFAULT_TEXT_COLOR,
+            borderColor:
+                typeof label.borderColor === 'string'
+                    ? label.borderColor
+                    : DEFAULT_BORDER_COLOR,
             borderWidth: clamp(
                 numberOr(label.borderWidth, DEFAULT_BORDER_WIDTH),
                 0,

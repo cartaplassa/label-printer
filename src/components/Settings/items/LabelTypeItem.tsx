@@ -1,3 +1,4 @@
+import { ColorPickerPreset } from '@/components/ColorPickerPreset';
 import { ExpandableTextarea } from '@/components/ExpandableTextarea';
 import { NumberSetter } from '@/components/NumberSetter';
 import FilePickerTrigger from '@/components/Settings/FilePickerTrigger';
@@ -128,7 +129,21 @@ export function LabelTypeItem() {
                             >
                                 <AlignRight />
                             </Button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label htmlFor="text-color-selector">
+                                Text&nbsp;color
+                            </label>
+                            <ColorPickerPreset
+                                id="text-color-selector"
+                                value={label.textColor}
+                                onValueChange={(textColor: string) =>
+                                    updateLabel({ textColor })
+                                }
+                            />
+                            <label htmlFor="wrap-control">Wrap</label>
                             <Button
+                                id="wrap-control"
                                 disabled={label.type !== 'text'}
                                 onClick={() =>
                                     updateLabel({ textWrap: !label.textWrap })
@@ -195,7 +210,6 @@ export function LabelTypeItem() {
                     </FieldContent>
                 </Field>
             </RadioGroup>
-
             <NumberSetter
                 label="Border"
                 unit="pt"
@@ -204,6 +218,16 @@ export function LabelTypeItem() {
                 max={BORDER_WIDTH_MAX}
                 step={0.01}
             />
+            <div className="flex items-center gap-2">
+                <label htmlFor="border-color-selector">Border&nbsp;color</label>
+                <ColorPickerPreset
+                    id="border-color-selector"
+                    value={label.borderColor}
+                    onValueChange={(borderColor: string) =>
+                        updateLabel({ borderColor })
+                    }
+                />
+            </div>
         </PositionsAccordionItem>
     );
 }
