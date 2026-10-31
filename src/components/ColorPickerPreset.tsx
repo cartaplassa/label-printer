@@ -6,7 +6,6 @@ import {
     ColorPickerContent,
     ColorPickerControl,
     ColorPickerEyeDropperTrigger,
-    ColorPickerInput,
     type ColorPickerProps,
     ColorPickerSlider,
     ColorPickerSwatchPreview,
@@ -14,8 +13,8 @@ import {
     ColorPickerTrigger,
     ColorPickerView,
 } from '@/components/ui/ColorPicker';
+import { ColorPickerRGBAInput } from './ColorPickerRGBAInput';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 
 export type ColorPickerPresetProps = Omit<ColorPickerProps, 'onValueChange'> & {
     onValueChange?: (val: string) => void;
@@ -46,12 +45,7 @@ export const ColorPickerPreset = ({
                             <ColorPickerSwatchPreview />
                         </Button>
                     </ColorPickerTrigger>
-                    <ColorPickerInput asChild channel="hex">
-                        <Input style={{ width: '10ch' }} />
-                    </ColorPickerInput>
-                    <ColorPickerInput asChild channel="alpha">
-                        <Input style={{ width: '9ch' }} />
-                    </ColorPickerInput>
+                    <ColorPickerRGBAInput style={{ width: '12ch' }} />
                 </div>
             </ColorPickerControl>
 
