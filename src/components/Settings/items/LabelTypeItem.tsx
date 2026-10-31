@@ -135,6 +135,7 @@ export function LabelTypeItem() {
                                 Text&nbsp;color
                             </label>
                             <ColorPickerPreset
+                                disabled={label.type !== 'text'}
                                 id="text-color-selector"
                                 value={label.textColor}
                                 onValueChange={(textColor: string) =>

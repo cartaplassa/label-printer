@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/ColorPicker';
 import { ColorPickerRGBAInput } from './ColorPickerRGBAInput';
 import { Button } from './ui/button';
+import { cn } from '@/lib/cn';
 
 export type ColorPickerPresetProps = Omit<ColorPickerProps, 'onValueChange'> & {
     onValueChange?: (val: string) => void;
@@ -22,6 +23,9 @@ export type ColorPickerPresetProps = Omit<ColorPickerProps, 'onValueChange'> & {
 
 export const ColorPickerPreset = ({
     onValueChange,
+    id,
+    className,
+    disabled,
     ...rest
 }: ColorPickerPresetProps) => {
     const handleValueChange = onValueChange
@@ -39,13 +43,19 @@ export const ColorPickerPreset = ({
             onValueChange={handleValueChange}
         >
             <ColorPickerControl>
-                <div className="flex items-stretch gap-2">
-                    <ColorPickerTrigger asChild>
+                <div
+                    className={cn('flex items-stretch gap-2', className)}
+                    id={id}
+                >
+                    <ColorPickerTrigger disabled={disabled} asChild>
                         <Button variant="outline">
                             <ColorPickerSwatchPreview />
                         </Button>
                     </ColorPickerTrigger>
-                    <ColorPickerRGBAInput style={{ width: '12ch' }} />
+                    <ColorPickerRGBAInput
+                        disabled={disabled}
+                        style={{ width: '12ch' }}
+                    />
                 </div>
             </ColorPickerControl>
 
