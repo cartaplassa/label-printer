@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 import { type ManifestOptions, VitePWA } from 'vite-plugin-pwa';
+import path from 'node:path';
 
 const manifest: Partial<ManifestOptions> = {
     background_color: 'oklch(0.216 0.006 56.043)',
@@ -51,9 +51,14 @@ const manifest: Partial<ManifestOptions> = {
 
 export default defineConfig({
     base: '/label-printer',
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+            '~': path.resolve(__dirname, './'),
+        },
+    },
     plugins: [
         react(),
-        tsconfigPaths(),
         tailwindcss(),
         VitePWA({
             manifest,
