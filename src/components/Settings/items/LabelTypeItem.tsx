@@ -65,6 +65,7 @@ export function LabelTypeItem() {
                         <div className="flex items-center gap-2">
                             <label htmlFor="font-family-select">Font</label>
                             <Select
+                                disabled={label.type !== 'text'}
                                 id="font-family-select"
                                 value={label.fontFamily}
                                 onValueChange={(fontFamily) =>
@@ -89,6 +90,7 @@ export function LabelTypeItem() {
                                 </SelectContent>
                             </Select>
                             <Button
+                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'left'
                                         ? 'default'
@@ -101,6 +103,7 @@ export function LabelTypeItem() {
                                 <AlignLeft />
                             </Button>
                             <Button
+                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'center'
                                         ? 'default'
@@ -113,6 +116,7 @@ export function LabelTypeItem() {
                                 <AlignCenter />
                             </Button>
                             <Button
+                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'right'
                                         ? 'default'
@@ -125,6 +129,7 @@ export function LabelTypeItem() {
                                 <AlignRight />
                             </Button>
                             <Button
+                                disabled={label.type !== 'text'}
                                 onClick={() =>
                                     updateLabel({ textWrap: !label.textWrap })
                                 }
@@ -146,6 +151,7 @@ export function LabelTypeItem() {
                             step={0.5}
                         />
                         <NumberSetter
+                            disabled={label.type !== 'text'}
                             value={label.fontWeight}
                             setValue={(fontWeight) =>
                                 updateLabel({ fontWeight })
@@ -164,6 +170,7 @@ export function LabelTypeItem() {
                             }
                         />
                         <NumberSetter
+                            disabled={label.type !== 'text'}
                             value={label.lineHeight}
                             setValue={(lineHeight) =>
                                 updateLabel({ lineHeight })
@@ -174,6 +181,7 @@ export function LabelTypeItem() {
                             max={2}
                         />
                         <NumberSetter
+                            disabled={label.type !== 'text'}
                             value={label.letterSpacing}
                             setValue={(letterSpacing) =>
                                 updateLabel({ letterSpacing })
