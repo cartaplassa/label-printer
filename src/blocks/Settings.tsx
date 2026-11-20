@@ -1,6 +1,5 @@
 import { RotateCcwSquare, RotateCwSquare } from 'lucide-react';
-import type { ComponentPropsWithoutRef } from 'react';
-import { cn } from '@/lib/cn';
+import type { ReactNode } from 'react';
 import PrintButton from '@/components/PrintButton';
 import ReloadFrame from '@/components/ReloadFrame';
 import RepoLink from '@/components/RepoLink';
@@ -22,37 +21,23 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
-interface SettingsProps extends ComponentPropsWithoutRef<'div'> {}
-
-function Settings({ className, ...rest }: SettingsProps) {
+export function SettingsContent({ headerAction }: { headerAction?: ReactNode }) {
     const { format, landscape } = useSheet();
     const setPaperFormat = useConfigStore((state) => state.setPaperFormat);
     const toggleLandscape = useConfigStore((state) => state.toggleLandscape);
 
     return (
-        <div
-            className={cn(
-                'border border-stone-500 p-2 rounded-md',
-                'bg-background',
-                'flex flex-col gap-2 min-w-md max-w-md',
-                className,
-            )}
-            {...rest}
-        >
-            <div className="flex gap-2 items-center">
-                <h1>label-printer</h1>
-                <div className="grow">
-                    <span className="hidden">
-                        That's a spacer with an invisible text you shouldn't be
-                        able to read
-                    </span>
-                </div>
+        <div className="flex h-full min-h-0 flex-col gap-2">
+            <div className="flex items-center gap-2">
+                <h1 className="font-semibold">label-printer</h1>
+                <div className="grow" />
                 <PrintButton />
                 <ThemeToggle />
                 <RepoLink />
+                {headerAction}
             </div>
             <ReloadFrame />
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
                 <Select
                     value={format}
                     onValueChange={(next) => {
@@ -64,13 +49,16 @@ function Settings({ className, ...rest }: SettingsProps) {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            {PAPER_FORMAT_KEYS.map((format) => {
+                            {PAPER_FORMAT_KEYS.map((formatKey) => {
                                 const { width, height, unit } =
-                                    PAPER_FORMATS[format];
+                                    PAPER_FORMATS[formatKey];
 
                                 return (
-                                    <SelectItem key={format} value={format}>
-                                        {format} · {width} × {height} {unit}
+                                    <SelectItem
+                                        key={formatKey}
+                                        value={formatKey}
+                                    >
+                                        {formatKey} · {width} × {height} {unit}
                                     </SelectItem>
                                 );
                             })}
@@ -80,13 +68,16 @@ function Settings({ className, ...rest }: SettingsProps) {
                 <Button
                     onClick={toggleLandscape}
                     variant={landscape ? 'default' : 'outline'}
+                    aria-label={
+                        landscape ? 'Switch to portrait' : 'Switch to landscape'
+                    }
                 >
                     {landscape ? <RotateCwSquare /> : <RotateCcwSquare />}
                 </Button>
             </div>
-            <PositionsAccordion />
+            <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                <PositionsAccordion />
+            </div>
         </div>
     );
 }
-
-export default Settings;

@@ -1,18 +1,39 @@
+import { useState } from 'react';
 import { cn } from '@/lib/cn';
 import Page from './blocks/Page';
-import Settings from './blocks/Settings';
+import {
+    DesktopSettingsWrapper,
+    SETTINGS_DEFAULT_WIDTH,
+} from './blocks/DesktopSettingsWrapper';
+import { MobileSettingsWrapper } from './blocks/MobileSettingsWrapper';
 
 function App() {
+    const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
+    const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+    const [sidebarWidth, setSidebarWidth] = useState(SETTINGS_DEFAULT_WIDTH);
+
     return (
-        <div // TODO low-width breakpoint
+        <div
             className={cn(
-                'flex items-center',
-                'w-dvw max-w-dvw h-dvh max-h-dvh',
+                'flex h-dvh w-dvw overflow-hidden',
                 'bg-stone-300 dark:bg-stone-900',
             )}
         >
-            <Page className="grow" />
-            <Settings className="fixed right-2 top-[50%] transform -translate-y-1/2" />
+            <Page
+                className="flex-1 min-w-0"
+                desktopSidebarCollapsed={isDesktopCollapsed}
+                onToggleDesktopSidebar={() => setIsDesktopCollapsed((v) => !v)}
+            />
+            <DesktopSettingsWrapper
+                collapsed={isDesktopCollapsed}
+                width={sidebarWidth}
+                onWidthChange={setSidebarWidth}
+            />
+            <MobileSettingsWrapper
+                open={isMobileSettingsOpen}
+                onOpen={() => setIsMobileSettingsOpen(true)}
+                onClose={() => setIsMobileSettingsOpen(false)}
+            />
         </div>
     );
 }

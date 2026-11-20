@@ -1,5 +1,5 @@
 import type { ClassValue } from 'clsx';
-import { Minus, Plus, RotateCcw } from 'lucide-react';
+import { Minus, PanelRightClose, PanelRightOpen, Plus, RotateCcw } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import {
     TransformComponent,
@@ -64,35 +64,72 @@ const ControlButton = ({
     </Button>
 );
 
-const Controls = () => {
+interface ControlsProps {
+    desktopSidebarCollapsed?: boolean;
+    onToggleDesktopSidebar?: () => void;
+}
+
+const Controls = ({
+    desktopSidebarCollapsed,
+    onToggleDesktopSidebar,
+}: ControlsProps) => {
     const { zoomIn, zoomOut, resetTransform } = useControls();
 
     return (
-        <div
-            className={cn(
-                'fixed top-3 left-1/2 z-10',
-                'transform -translate-x-1/2',
-                'flex gap-2',
-            )}
-        >
-            <ControlButton onClick={() => zoomIn()}>
-                <Plus />
-            </ControlButton>
-            <ControlButton onClick={() => zoomOut()}>
-                <Minus />
-            </ControlButton>
-            <ControlButton onClick={() => resetTransform()}>
-                <RotateCcw />
-            </ControlButton>
+        <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex items-start">
+            <div className="flex-1" />
+            <div className="pointer-events-auto flex gap-2">
+                <ControlButton onClick={() => zoomIn()}>
+                    <Plus />
+                </ControlButton>
+                <ControlButton onClick={() => zoomOut()}>
+                    <Minus />
+                </ControlButton>
+                <ControlButton onClick={() => resetTransform()}>
+                    <RotateCcw />
+                </ControlButton>
+            </div>
+            <div className="flex flex-1 justify-end">
+                {onToggleDesktopSidebar ? (
+                    <ControlButton
+                        onClick={onToggleDesktopSidebar}
+                        className="pointer-events-auto hidden md:inline-flex"
+                        aria-label={
+                            desktopSidebarCollapsed
+                                ? 'Show settings sidebar'
+                                : 'Hide settings sidebar'
+                        }
+                        title={
+                            desktopSidebarCollapsed
+                                ? 'Show settings sidebar'
+                                : 'Hide settings sidebar'
+                        }
+                    >
+                        {desktopSidebarCollapsed ? (
+                            <PanelRightOpen />
+                        ) : (
+                            <PanelRightClose />
+                        )}
+                    </ControlButton>
+                ) : null}
+            </div>
         </div>
     );
 };
 
-interface PageProps extends ComponentPropsWithoutRef<typeof TransformWrapper> {
-    className: ClassValue;
+interface PageProps
+    extends Omit<ComponentPropsWithoutRef<typeof TransformWrapper>, 'children'> {
+    className?: ClassValue;
+    desktopSidebarCollapsed?: boolean;
+    onToggleDesktopSidebar?: () => void;
 }
 
-function Page({ className, ...rest }: PageProps) {
+function Page({
+    className,
+    desktopSidebarCollapsed,
+    onToggleDesktopSidebar,
+    ...rest
+}: PageProps) {
     return (
         <TransformWrapper
             initialScale={0.8}
@@ -101,17 +138,25 @@ function Page({ className, ...rest }: PageProps) {
             initialPositionY={0}
             {...rest}
         >
-            <div className="grow">
-                <Controls />
+            <div className={cn('relative h-full w-full min-w-0 min-h-0', className)}>
+                <Controls
+                    desktopSidebarCollapsed={desktopSidebarCollapsed}
+                    onToggleDesktopSidebar={onToggleDesktopSidebar}
+                />
                 <TransformComponent
+                    wrapperClass="!w-full !h-full"
                     wrapperStyle={{
-                        width: '100dvw',
-                        maxWidth: '100dvw',
-                        height: '100dvh',
-                        maxHeight: '100dvh',
+                        width: '100%',
+                        height: '100%',
+                    }}
+                    contentStyle={{
+                        width: '100%',
+                        height: '100%',
                     }}
                 >
-                    <Sheet />
+                    <div className="flex h-full w-full items-center justify-center">
+                        <Sheet />
+                    </div>
                 </TransformComponent>
             </div>
         </TransformWrapper>
