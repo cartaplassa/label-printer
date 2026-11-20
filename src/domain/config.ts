@@ -6,6 +6,7 @@ import {
     type PaperFormat,
     roundLength,
     type Side,
+    SIDES,
     type Sides,
     sideToDimension,
     type Unit,
@@ -33,10 +34,22 @@ export const FONT_WEIGHT_RANGES = {
     [FONT_FALLBACK]: [100, 900],
 } as const satisfies Record<FontFamily, [number, number]>;
 
+export const BORDER_STYLES = [
+    'solid',
+    'dotted',
+    'dashed',
+    'double',
+    'groove',
+    'ridge',
+    'inset',
+    'outset',
+] as const;
+export type BorderStyle = (typeof BORDER_STYLES)[number];
+
 export interface LabelConfig {
     type: LabelType;
     image: string;
-    fontFamily: FontFamily | null;
+    fontFamily: FontFamily;
     fontWeight: number;
     lineHeight: number;
     letterSpacing: number;
@@ -46,6 +59,7 @@ export interface LabelConfig {
     textSize: number; // pt
     textColor: string;
     borderColor: string;
+    borderStyle: BorderStyle;
     borderWidth: number; // pt
     width: number; // uom
     height: number; // uom
@@ -65,8 +79,11 @@ export interface Config {
     sheet: SheetConfig;
 }
 
-export type LabelPatch = Partial<Omit<LabelConfig, 'paddings'>>;
-export type SheetPatch = Partial<
+type PartialNullable<T> = {
+    [P in keyof T]?: T[P] | null | undefined;
+};
+export type LabelPatch = PartialNullable<Omit<LabelConfig, 'paddings'>>;
+export type SheetPatch = PartialNullable<
     Omit<SheetConfig, 'paddings' | 'format' | 'landscape'>
 >;
 
@@ -88,6 +105,7 @@ const DEFAULT_TEXT = '';
 const DEFAULT_TEXT_ALIGN = 'center';
 const DEFAULT_TEXT_WRAP = false;
 const DEFAULT_TEXT_COLOR = '#000000ff';
+const DEFAULT_BORDER_STYLE: BorderStyle = 'solid';
 const DEFAULT_BORDER_COLOR = '#000000ff';
 const DEFAULT_LABEL_TYPE: LabelType = 'image';
 
@@ -101,33 +119,51 @@ const createPaddings = (): Sides<number> => ({
     left: DEFAULT_PADDING,
 });
 
+const numOrDef = (val: unknown) =>
+    typeof val === 'number' ? val : DEFAULT_PADDING;
+const ensurePaddings = (paddings: unknown): Sides<number> => {
+    if (typeof paddings !== 'object' || paddings === null)
+        return createPaddings();
+    const p = paddings as Record<string, unknown>;
+    return {
+        top: numOrDef(p.top),
+        right: numOrDef(p.right),
+        bottom: numOrDef(p.bottom),
+        left: numOrDef(p.left),
+    };
+};
+
+export const createDefaultLabelConfig = (): LabelConfig => ({
+    type: DEFAULT_LABEL_TYPE,
+    image: DEFAULT_IMAGE,
+    fontFamily: DEFAULT_FONT_FAMILY,
+    fontWeight: DEFAULT_FONT_WEIGHT,
+    lineHeight: DEFAULT_LINE_HEIGHT,
+    letterSpacing: DEFAULT_LETTER_SPACING,
+    text: DEFAULT_TEXT,
+    textAlign: DEFAULT_TEXT_ALIGN,
+    textWrap: DEFAULT_TEXT_WRAP,
+    textSize: DEFAULT_TEXT_SIZE,
+    textColor: DEFAULT_TEXT_COLOR,
+    borderColor: DEFAULT_BORDER_COLOR,
+    borderStyle: DEFAULT_BORDER_STYLE,
+    borderWidth: DEFAULT_BORDER_WIDTH,
+    width: DEFAULT_LABEL_WIDTH,
+    height: DEFAULT_LABEL_HEIGHT,
+    paddings: createPaddings(),
+});
+export const createDefaultSheetConfig = (): SheetConfig => ({
+    format: DEFAULT_FORMAT,
+    landscape: false,
+    paddings: createPaddings(),
+    gapX: 0,
+    gapY: 0,
+});
+
 export function createDefaultConfig(): Config {
     return {
-        label: {
-            type: DEFAULT_LABEL_TYPE,
-            image: DEFAULT_IMAGE,
-            fontFamily: DEFAULT_FONT_FAMILY,
-            fontWeight: DEFAULT_FONT_WEIGHT,
-            lineHeight: DEFAULT_LINE_HEIGHT,
-            letterSpacing: DEFAULT_LETTER_SPACING,
-            text: DEFAULT_TEXT,
-            textAlign: DEFAULT_TEXT_ALIGN,
-            textWrap: DEFAULT_TEXT_WRAP,
-            textSize: DEFAULT_TEXT_SIZE,
-            textColor: DEFAULT_TEXT_COLOR,
-            borderColor: DEFAULT_BORDER_COLOR,
-            borderWidth: DEFAULT_BORDER_WIDTH,
-            width: DEFAULT_LABEL_WIDTH,
-            height: DEFAULT_LABEL_HEIGHT,
-            paddings: createPaddings(),
-        },
-        sheet: {
-            format: DEFAULT_FORMAT,
-            landscape: false,
-            paddings: createPaddings(),
-            gapX: 0,
-            gapY: 0,
-        },
+        label: createDefaultLabelConfig(),
+        sheet: createDefaultSheetConfig(),
     };
 }
 
@@ -211,15 +247,20 @@ export function convertConfigUnits(
     };
 }
 
-export function normalizeConfig(config: Config): Config {
-    const label = config.label ?? ({} as LabelConfig);
-    const sheet = config.sheet ?? ({} as SheetConfig);
+const isNonIndexable = (val: unknown) =>
+    typeof val !== 'object' || val === null;
+
+export function normalizeConfig(config: unknown): Config {
+    if (isNonIndexable(config)) return createDefaultConfig();
+    const c = config as Record<string, unknown>;
+    const label = c.label ?? ({} as LabelConfig);
+    const sheet = c.sheet ?? ({} as SheetConfig);
     const format = isPaperFormat(sheet.format) ? sheet.format : DEFAULT_FORMAT;
     const landscape = sheet.landscape === true;
     const paper = getPaperSize(format, landscape);
 
     const sheetPaddings = clampPaddings(
-        sheet.paddings ?? createPaddings(),
+        ensurePaddings(sheet.paddings),
         paper.width,
         paper.height,
     );
@@ -234,7 +275,7 @@ export function normalizeConfig(config: Config): Config {
         paper.height,
     );
     const labelPaddings = clampPaddings(
-        label.paddings ?? createPaddings(),
+        ensurePaddings(label.paddings),
         labelWidth,
         labelHeight,
     );
@@ -282,6 +323,9 @@ export function normalizeConfig(config: Config): Config {
                 typeof label.borderColor === 'string'
                     ? label.borderColor
                     : DEFAULT_BORDER_COLOR,
+            borderStyle: BORDER_STYLES.includes(label.borderStyle)
+                ? label.borderStyle
+                : DEFAULT_BORDER_STYLE,
             borderWidth: clamp(
                 numberOr(label.borderWidth, DEFAULT_BORDER_WIDTH),
                 0,

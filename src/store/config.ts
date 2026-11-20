@@ -87,6 +87,7 @@ function migrateConfig(persisted: unknown, version: number): Config {
             textSize: old.labelTextSize ?? defaults.label.textSize,
             textColor: defaults.label.textColor,
             borderColor: defaults.label.borderColor,
+            borderStyle: defaults.label.borderStyle,
             borderWidth: old.labelBorderWidth ?? defaults.label.borderWidth,
             width: old.labelWidth ?? defaults.label.width,
             height: old.labelHeight ?? defaults.label.height,

@@ -42,7 +42,7 @@ export function buildPrintCss({
                 outline-width: ${borderWidth(label.borderWidth)};
                 outline-offset: -${borderWidth(label.borderWidth)};
                 outline-color: ${label.borderColor};
-                outline-style: solid;
+                outline-style: ${label.borderStyle};
             }
 
             .CELL p {

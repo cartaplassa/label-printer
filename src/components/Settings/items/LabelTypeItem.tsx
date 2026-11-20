@@ -22,7 +22,10 @@ import {
     isLabelType,
     TEXT_SIZE_MAX,
     type FontFamily,
+    BORDER_STYLES,
+    BorderStyle,
 } from '@/domain/config';
+import { cn } from '@/lib/cn';
 import { useConfigStore, useLabel } from '@/store';
 import {
     AlignCenter,
@@ -31,6 +34,7 @@ import {
     AlignJustify,
     WrapText,
 } from 'lucide-react';
+import { ComponentPropsWithRef } from 'react';
 
 export function LabelTypeItem() {
     const label = useLabel();
@@ -70,11 +74,7 @@ export function LabelTypeItem() {
                                 id="font-family-select"
                                 value={label.fontFamily}
                                 onValueChange={(fontFamily) =>
-                                    updateLabel({
-                                        fontFamily:
-                                            (fontFamily as FontFamily) ??
-                                            FONT_FALLBACK,
-                                    })
+                                    updateLabel({ fontFamily })
                                 }
                             >
                                 <SelectTrigger className="w-full grow">
@@ -220,7 +220,7 @@ export function LabelTypeItem() {
                 step={0.01}
             />
             <div className="flex items-center gap-2">
-                <label htmlFor="border-color-selector">Border&nbsp;color</label>
+                <label htmlFor="border-color-selector">Color</label>
                 <ColorPickerPreset
                     id="border-color-selector"
                     value={label.borderColor}
@@ -228,7 +228,58 @@ export function LabelTypeItem() {
                         updateLabel({ borderColor })
                     }
                 />
+                <label htmlFor="border-style-select">Style</label>
+                <Select
+                    id="border-style-select"
+                    value={label.borderStyle}
+                    onValueChange={(borderStyle) =>
+                        updateLabel({ borderStyle })
+                    }
+                >
+                    <SelectTrigger className="w-full grow">
+                        <SelectValue
+                            render={(props, state) => (
+                                <BorderStyleShowcase
+                                    borderStyle={state.value}
+                                    {...props}
+                                />
+                            )}
+                        />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {BORDER_STYLES.map((borderStyle) => (
+                                <SelectItem
+                                    key={borderStyle}
+                                    value={borderStyle}
+                                >
+                                    <BorderStyleShowcase
+                                        borderStyle={borderStyle}
+                                    />
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
             </div>
         </PositionsAccordionItem>
     );
 }
+
+type BorderStyleShowcaseProps = ComponentPropsWithRef<'div'> & {
+    borderStyle: string;
+};
+
+const BorderStyleShowcase = ({
+    borderStyle,
+    style,
+    className,
+    ...rest
+}: BorderStyleShowcaseProps) => (
+    <div className={cn('p-2 w-full', className)} {...rest}>
+        <div
+            className="border-t-4 border-t-primary w-full"
+            style={{ borderStyle }}
+        />
+    </div>
+);
