@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { z } from 'zod';
 import {
     type Config,
     convertConfigUnits,
     createDefaultConfig,
     DEFAULT_IMAGE,
-    isConfig,
     type LabelPatch,
     normalizeConfig,
     type SheetPatch,
@@ -32,26 +32,16 @@ export interface ConfigActions {
 
 export type ConfigStore = Config & ConfigActions;
 
-interface LegacyConfig {
-    paperFormat?: PaperFormat;
-    isPaperRotationAlbum?: boolean;
-    labelType?: 'text' | 'image';
-    labelBorderWidth?: number;
-    labelText?: string;
-    labelTextSize?: number;
-    labelImage?: string;
-    sheetPaddings?: Sides<number>;
-    labelWidth?: number;
-    labelHeight?: number;
-    sheetGapX?: number;
-    sheetGapY?: number;
-    labelPaddings?: Sides<number>;
-}
-
 const CONFIG_VERSION = 1;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' && value !== null;
+const PersistedConfigShapeSchema = z
+    .object({
+        label: z.record(z.string(), z.unknown()),
+        sheet: z.record(z.string(), z.unknown()),
+    })
+    .passthrough();
+
+const LegacyConfigSchema = z.record(z.string(), z.unknown());
 
 const patchPaddings = (
     paddings: Sides<number>,
@@ -65,42 +55,75 @@ const patchPaddings = (
 function migrateConfig(persisted: unknown, version: number): Config {
     const defaults = createDefaultConfig();
 
-    if (!isRecord(persisted)) return defaults;
-
     if (version >= CONFIG_VERSION) {
-        return isConfig(persisted) ? normalizeConfig(persisted) : defaults;
+        const parsed = PersistedConfigShapeSchema.safeParse(persisted);
+        return parsed.success ? normalizeConfig(parsed.data) : defaults;
     }
 
-    const old = persisted as LegacyConfig;
+    const legacy = LegacyConfigSchema.safeParse(persisted);
+    if (!legacy.success) return defaults;
+    const old = legacy.data;
+
+    const labelType =
+        old.labelType === 'text' || old.labelType === 'image'
+            ? old.labelType
+            : defaults.label.type;
 
     return normalizeConfig({
         label: {
-            type: old.labelType ?? defaults.label.type,
-            image: old.labelImage ?? defaults.label.image,
+            type: labelType,
+            image:
+                typeof old.labelImage === 'string'
+                    ? old.labelImage
+                    : defaults.label.image,
             fontFamily: defaults.label.fontFamily,
             fontWeight: defaults.label.fontWeight,
             lineHeight: defaults.label.lineHeight,
             letterSpacing: defaults.label.letterSpacing,
-            text: old.labelText ?? defaults.label.text,
+            text:
+                typeof old.labelText === 'string'
+                    ? old.labelText
+                    : defaults.label.text,
             textAlign: defaults.label.textAlign,
             textWrap: defaults.label.textWrap,
-            textSize: old.labelTextSize ?? defaults.label.textSize,
+            textSize:
+                typeof old.labelTextSize === 'number'
+                    ? old.labelTextSize
+                    : defaults.label.textSize,
             textColor: defaults.label.textColor,
             borderColor: defaults.label.borderColor,
             borderStyle: defaults.label.borderStyle,
-            borderWidth: old.labelBorderWidth ?? defaults.label.borderWidth,
-            width: old.labelWidth ?? defaults.label.width,
-            height: old.labelHeight ?? defaults.label.height,
+            borderWidth:
+                typeof old.labelBorderWidth === 'number'
+                    ? old.labelBorderWidth
+                    : defaults.label.borderWidth,
+            width:
+                typeof old.labelWidth === 'number'
+                    ? old.labelWidth
+                    : defaults.label.width,
+            height:
+                typeof old.labelHeight === 'number'
+                    ? old.labelHeight
+                    : defaults.label.height,
             paddings: old.labelPaddings ?? defaults.label.paddings,
         },
         sheet: {
             format: isPaperFormat(old.paperFormat)
                 ? old.paperFormat
                 : defaults.sheet.format,
-            landscape: old.isPaperRotationAlbum ?? defaults.sheet.landscape,
+            landscape:
+                typeof old.isPaperRotationAlbum === 'boolean'
+                    ? old.isPaperRotationAlbum
+                    : defaults.sheet.landscape,
             paddings: old.sheetPaddings ?? defaults.sheet.paddings,
-            gapX: old.sheetGapX ?? defaults.sheet.gapX,
-            gapY: old.sheetGapY ?? defaults.sheet.gapY,
+            gapX:
+                typeof old.sheetGapX === 'number'
+                    ? old.sheetGapX
+                    : defaults.sheet.gapX,
+            gapY:
+                typeof old.sheetGapY === 'number'
+                    ? old.sheetGapY
+                    : defaults.sheet.gapY,
         },
     });
 }
@@ -197,9 +220,10 @@ export const useConfigStore = create<ConfigStore>()(
             partialize: ({ label, sheet }) => ({ label, sheet }),
             migrate: migrateConfig,
             merge: (persisted, current) => {
-                if (!isConfig(persisted)) return current;
+                const parsed = PersistedConfigShapeSchema.safeParse(persisted);
+                if (!parsed.success) return current;
 
-                return { ...current, ...normalizeConfig(persisted) };
+                return { ...current, ...normalizeConfig(parsed.data) };
             },
         },
     ),

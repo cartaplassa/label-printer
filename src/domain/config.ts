@@ -1,8 +1,9 @@
+import { z } from 'zod';
 import exampleImage from '@/assets/exampleImage';
 import {
     convertLength,
     getPaperSize,
-    isPaperFormat,
+    PAPER_FORMAT_KEYS,
     type PaperFormat,
     roundLength,
     type Side,
@@ -118,20 +119,6 @@ const createPaddings = (): Sides<number> => ({
     left: DEFAULT_PADDING,
 });
 
-const numOrDef = (val: unknown) =>
-    typeof val === 'number' ? val : DEFAULT_PADDING;
-const ensurePaddings = (paddings: unknown): Sides<number> => {
-    if (typeof paddings !== 'object' || paddings === null)
-        return createPaddings();
-    const p = paddings as Record<string, unknown>;
-    return {
-        top: numOrDef(p.top),
-        right: numOrDef(p.right),
-        bottom: numOrDef(p.bottom),
-        left: numOrDef(p.left),
-    };
-};
-
 export const createDefaultLabelConfig = (): LabelConfig => ({
     type: DEFAULT_LABEL_TYPE,
     image: DEFAULT_IMAGE,
@@ -166,9 +153,6 @@ export function createDefaultConfig(): Config {
     };
 }
 
-const numberOr = (value: unknown, fallback: number): number =>
-    typeof value === 'number' && Number.isFinite(value) ? value : fallback;
-
 const clamp = (value: number, min: number, max: number): number =>
     Math.min(Math.max(value, min), max);
 
@@ -178,23 +162,16 @@ export const paddingLimit = (
     height: number,
 ): number => (sideToDimension[side] === 'width' ? width : height) / 2;
 
-const clampPadding = (
-    value: unknown,
-    side: Side,
-    width: number,
-    height: number,
-): number => clamp(numberOr(value, 0), 0, paddingLimit(side, width, height));
-
 export function clampPaddings(
     paddings: Sides<number>,
     width: number,
     height: number,
 ): Sides<number> {
     return {
-        top: clampPadding(paddings.top, 'top', width, height),
-        right: clampPadding(paddings.right, 'right', width, height),
-        bottom: clampPadding(paddings.bottom, 'bottom', width, height),
-        left: clampPadding(paddings.left, 'left', width, height),
+        top: clamp(paddings.top, 0, paddingLimit('top', width, height)),
+        right: clamp(paddings.right, 0, paddingLimit('right', width, height)),
+        bottom: clamp(paddings.bottom, 0, paddingLimit('bottom', width, height)),
+        left: clamp(paddings.left, 0, paddingLimit('left', width, height)),
     };
 }
 
@@ -240,9 +217,6 @@ export function convertConfigUnits(
     };
 }
 
-const isNonIndexable = (val: unknown) =>
-    typeof val !== 'object' || val === null;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -250,102 +224,146 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export const isConfig = (value: unknown): value is Config =>
     isRecord(value) && isRecord(value.label) && isRecord(value.sheet);
 
+const finiteNumber = (fallback: number) =>
+    z.number().finite().catch(fallback);
+const finiteNumberOrZero = z.number().finite().catch(0);
+
+const defaultPaddings: Sides<number> = createPaddings();
+
+const PaddingsSchema = z
+    .object({
+        top: finiteNumber(DEFAULT_PADDING),
+        right: finiteNumber(DEFAULT_PADDING),
+        bottom: finiteNumber(DEFAULT_PADDING),
+        left: finiteNumber(DEFAULT_PADDING),
+    })
+    .catch(defaultPaddings);
+
+const RawLabelSchema = z
+    .object({
+        type: z.enum(['text', 'image'] as const).catch(DEFAULT_LABEL_TYPE),
+        image: z.string().catch(DEFAULT_IMAGE),
+        fontFamily: z
+            .enum(FONT_FAMILIES as [FontFamily, ...FontFamily[]])
+            .catch(DEFAULT_FONT_FAMILY),
+        fontWeight: finiteNumber(DEFAULT_FONT_WEIGHT),
+        lineHeight: finiteNumber(DEFAULT_LINE_HEIGHT),
+        letterSpacing: finiteNumber(DEFAULT_LETTER_SPACING),
+        text: z.string().catch(DEFAULT_TEXT),
+        textAlign: z.enum(TEXT_ALIGN_OPTIONS).catch(DEFAULT_TEXT_ALIGN),
+        textWrap: z.unknown().transform((value) => Boolean(value)),
+        textSize: finiteNumber(DEFAULT_TEXT_SIZE),
+        textColor: z.string().catch(DEFAULT_TEXT_COLOR),
+        borderColor: z.string().catch(DEFAULT_BORDER_COLOR),
+        borderStyle: z.enum(BORDER_STYLES).catch(DEFAULT_BORDER_STYLE),
+        borderWidth: finiteNumber(DEFAULT_BORDER_WIDTH),
+        width: finiteNumber(DEFAULT_LABEL_WIDTH),
+        height: finiteNumber(DEFAULT_LABEL_HEIGHT),
+        paddings: PaddingsSchema,
+    })
+    .passthrough()
+    .catch({
+        type: DEFAULT_LABEL_TYPE,
+        image: DEFAULT_IMAGE,
+        fontFamily: DEFAULT_FONT_FAMILY,
+        fontWeight: DEFAULT_FONT_WEIGHT,
+        lineHeight: DEFAULT_LINE_HEIGHT,
+        letterSpacing: DEFAULT_LETTER_SPACING,
+        text: DEFAULT_TEXT,
+        textAlign: DEFAULT_TEXT_ALIGN,
+        textWrap: DEFAULT_TEXT_WRAP,
+        textSize: DEFAULT_TEXT_SIZE,
+        textColor: DEFAULT_TEXT_COLOR,
+        borderColor: DEFAULT_BORDER_COLOR,
+        borderStyle: DEFAULT_BORDER_STYLE,
+        borderWidth: DEFAULT_BORDER_WIDTH,
+        width: DEFAULT_LABEL_WIDTH,
+        height: DEFAULT_LABEL_HEIGHT,
+        paddings: defaultPaddings,
+    });
+
+const RawSheetSchema = z
+    .object({
+        format: z
+            .enum(PAPER_FORMAT_KEYS as [PaperFormat, ...PaperFormat[]])
+            .catch(DEFAULT_FORMAT),
+        landscape: z.unknown().transform((value) => value === true),
+        paddings: PaddingsSchema,
+        gapX: finiteNumberOrZero,
+        gapY: finiteNumberOrZero,
+    })
+    .passthrough()
+    .catch({
+        format: DEFAULT_FORMAT,
+        landscape: false,
+        paddings: defaultPaddings,
+        gapX: 0,
+        gapY: 0,
+    });
+
+export const ConfigSchema = z
+    .unknown()
+    .transform((input): { label: unknown; sheet: unknown } => {
+        if (!isRecord(input)) return { label: {}, sheet: {} };
+        return {
+            label: isRecord(input.label) ? input.label : {},
+            sheet: isRecord(input.sheet) ? input.sheet : {},
+        };
+    })
+    .transform((input): Config => {
+        const label = RawLabelSchema.parse(input.label);
+        const sheet = RawSheetSchema.parse(input.sheet);
+
+        const paper = getPaperSize(sheet.format, sheet.landscape);
+
+        const sheetPaddings = clampPaddings(
+            sheet.paddings,
+            paper.width,
+            paper.height,
+        );
+        const labelWidth = clamp(label.width, 0, paper.width);
+        const labelHeight = clamp(label.height, 0, paper.height);
+        const labelPaddings = clampPaddings(
+            label.paddings,
+            labelWidth,
+            labelHeight,
+        );
+        const fontWeight = fitFontPaddings(
+            label.fontWeight,
+            FONT_WEIGHT_RANGES[label.fontFamily],
+        );
+
+        return {
+            label: {
+                type: label.type,
+                image: label.image,
+                fontFamily: label.fontFamily,
+                fontWeight,
+                lineHeight: label.lineHeight,
+                letterSpacing: label.letterSpacing,
+                text: label.text,
+                textAlign: label.textAlign,
+                textWrap: label.textWrap,
+                textSize: clamp(label.textSize, 0, TEXT_SIZE_MAX),
+                // TODO: color hex validation
+                textColor: label.textColor,
+                borderColor: label.borderColor,
+                borderStyle: label.borderStyle,
+                borderWidth: clamp(label.borderWidth, 0, BORDER_WIDTH_MAX),
+                width: labelWidth,
+                height: labelHeight,
+                paddings: labelPaddings,
+            },
+            sheet: {
+                format: sheet.format,
+                landscape: sheet.landscape,
+                paddings: sheetPaddings,
+                gapX: clamp(sheet.gapX, 0, labelWidth),
+                gapY: clamp(sheet.gapY, 0, labelHeight),
+            },
+        };
+    });
+
 export function normalizeConfig(config: unknown): Config {
-    if (isNonIndexable(config)) return createDefaultConfig();
-    const c = config as Record<string, unknown>;
-    const label = isRecord(c.label) ? c.label : ({} as LabelConfig);
-    const sheet = isRecord(c.sheet) ? c.sheet : ({} as SheetConfig);
-    const format = isPaperFormat(sheet?.format) ? sheet.format : DEFAULT_FORMAT;
-    const landscape = sheet.landscape === true;
-    const paper = getPaperSize(format, landscape);
-
-    const sheetPaddings = clampPaddings(
-        ensurePaddings(sheet.paddings),
-        paper.width,
-        paper.height,
-    );
-    const labelWidth = clamp(
-        numberOr(label.width, DEFAULT_LABEL_WIDTH),
-        0,
-        paper.width,
-    );
-    const labelHeight = clamp(
-        numberOr(label.height, DEFAULT_LABEL_HEIGHT),
-        0,
-        paper.height,
-    );
-    const labelPaddings = clampPaddings(
-        ensurePaddings(label.paddings),
-        labelWidth,
-        labelHeight,
-    );
-
-    const fontFamily: FontFamily =
-        typeof label.fontFamily === 'string' &&
-        FONT_FAMILIES.includes(label.fontFamily as FontFamily)
-            ? (label.fontFamily as FontFamily)
-            : DEFAULT_FONT_FAMILY;
-    const fontWeight = fitFontPaddings(
-        typeof label.fontWeight === 'number' ? label.fontWeight : 400,
-        FONT_WEIGHT_RANGES[fontFamily as FontFamily],
-    );
-
-    return {
-        label: {
-            type: isLabelType(label.type) ? label.type : DEFAULT_LABEL_TYPE,
-            image:
-                typeof label.image === 'string' ? label.image : DEFAULT_IMAGE,
-            fontFamily,
-            fontWeight,
-            lineHeight:
-                typeof label.lineHeight === 'number'
-                    ? label.lineHeight
-                    : DEFAULT_LINE_HEIGHT,
-            letterSpacing:
-                typeof label.letterSpacing === 'number'
-                    ? label.letterSpacing
-                    : DEFAULT_LETTER_SPACING,
-            text: typeof label.text === 'string' ? label.text : DEFAULT_TEXT,
-            textAlign:
-                typeof label.textAlign === 'string' &&
-                TEXT_ALIGN_OPTIONS.includes(label.textAlign as TextAlign)
-                    ? (label.textAlign as TextAlign)
-                    : DEFAULT_TEXT_ALIGN,
-            textWrap: Boolean(label.textWrap),
-            textSize: clamp(
-                numberOr(label.textSize, DEFAULT_TEXT_SIZE),
-                0,
-                TEXT_SIZE_MAX,
-            ),
-            // TODO: color hex validation
-            textColor:
-                typeof label.textColor === 'string'
-                    ? label.textColor
-                    : DEFAULT_TEXT_COLOR,
-            borderColor:
-                typeof label.borderColor === 'string'
-                    ? label.borderColor
-                    : DEFAULT_BORDER_COLOR,
-            borderStyle:
-                typeof label.borderStyle === 'string' &&
-                BORDER_STYLES.includes(label.borderStyle as BorderStyle)
-                    ? (label.borderStyle as BorderStyle)
-                    : DEFAULT_BORDER_STYLE,
-            borderWidth: clamp(
-                numberOr(label.borderWidth, DEFAULT_BORDER_WIDTH),
-                0,
-                BORDER_WIDTH_MAX,
-            ),
-            width: labelWidth,
-            height: labelHeight,
-            paddings: labelPaddings,
-        },
-        sheet: {
-            format,
-            landscape,
-            paddings: sheetPaddings,
-            gapX: clamp(numberOr(sheet.gapX, 0), 0, labelWidth),
-            gapY: clamp(numberOr(sheet.gapY, 0), 0, labelHeight),
-        },
-    };
+    return ConfigSchema.parse(config);
 }
