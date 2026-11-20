@@ -3,7 +3,8 @@ import { type ComponentProps, useId, useState } from 'react';
 import { cn } from '@/lib/cn';
 import { Textarea } from './ui/textarea';
 
-const BASE_STYLES = 'wrap-break-word overflow-hidden leading-5';
+const BASE_STYLES =
+    'wrap-break-word border overflow-hidden p-2 text-md tracking-normal';
 const GRID_CELL = 'col-start-1 col-end-2 row-start-2 row-end-3';
 const FIELD_STYLE =
     'leading-tight placeholder:select-none focus-visible:outline-none';
@@ -43,7 +44,8 @@ export function ExpandableTextarea({
                 className={cn(
                     'relative grid',
                     scrollable
-                        ? `no-scrollbar ${scrollable} min-h-0 content-start overflow-y-scroll`
+                        ? 'no-scrollbar min-h-0 content-start overflow-y-scroll' +
+                              scrollable
                         : 'content-center',
                 )}
             >
@@ -73,7 +75,7 @@ export function ExpandableTextarea({
                     className={cn(
                         BASE_STYLES,
                         GRID_CELL,
-                        'invisible whitespace-pre-wrap',
+                        'border-transparent invisible whitespace-pre-wrap leading-tight',
                         label && 'pt-4 not-focus:placeholder:opacity-0',
                     )}
                 >
