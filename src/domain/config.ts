@@ -6,7 +6,6 @@ import {
     type PaperFormat,
     roundLength,
     type Side,
-    SIDES,
     type Sides,
     sideToDimension,
     type Unit,
@@ -91,23 +90,23 @@ export const TEXT_SIZE_MAX = 100;
 export const BORDER_WIDTH_MAX = 10;
 export const DEFAULT_IMAGE = exampleImage;
 
-const DEFAULT_FORMAT: PaperFormat = 'A4';
-const DEFAULT_LABEL_WIDTH = 3;
-const DEFAULT_LABEL_HEIGHT = 1;
-const DEFAULT_PADDING = 0.1;
-const DEFAULT_TEXT_SIZE = 16;
-const DEFAULT_BORDER_WIDTH = 1;
-const DEFAULT_FONT_FAMILY = FONT_FALLBACK;
-const DEFAULT_FONT_WEIGHT = 400;
-const DEFAULT_LINE_HEIGHT = 1.5;
-const DEFAULT_LETTER_SPACING = 0;
-const DEFAULT_TEXT = '';
-const DEFAULT_TEXT_ALIGN = 'center';
-const DEFAULT_TEXT_WRAP = false;
-const DEFAULT_TEXT_COLOR = '#000000ff';
-const DEFAULT_BORDER_STYLE: BorderStyle = 'solid';
-const DEFAULT_BORDER_COLOR = '#000000ff';
-const DEFAULT_LABEL_TYPE: LabelType = 'image';
+export const DEFAULT_FORMAT: PaperFormat = 'A4';
+export const DEFAULT_LABEL_WIDTH = 3;
+export const DEFAULT_LABEL_HEIGHT = 1;
+export const DEFAULT_PADDING = 0.1;
+export const DEFAULT_TEXT_SIZE = 16;
+export const DEFAULT_BORDER_WIDTH = 1;
+export const DEFAULT_FONT_FAMILY = FONT_FALLBACK;
+export const DEFAULT_FONT_WEIGHT = 400;
+export const DEFAULT_LINE_HEIGHT = 1.5;
+export const DEFAULT_LETTER_SPACING = 0;
+export const DEFAULT_TEXT = '';
+export const DEFAULT_TEXT_ALIGN = 'center';
+export const DEFAULT_TEXT_WRAP = false;
+export const DEFAULT_TEXT_COLOR = '#000000ff';
+export const DEFAULT_BORDER_STYLE: BorderStyle = 'solid';
+export const DEFAULT_BORDER_COLOR = '#000000ff';
+export const DEFAULT_LABEL_TYPE: LabelType = 'image';
 
 export const isLabelType = (value: unknown): value is LabelType =>
     value === 'text' || value === 'image';
@@ -166,12 +165,6 @@ export function createDefaultConfig(): Config {
         sheet: createDefaultSheetConfig(),
     };
 }
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' && value !== null;
-
-export const isConfig = (value: unknown): value is Config =>
-    isRecord(value) && isRecord(value.label) && isRecord(value.sheet);
 
 const numberOr = (value: unknown, fallback: number): number =>
     typeof value === 'number' && Number.isFinite(value) ? value : fallback;
@@ -250,12 +243,19 @@ export function convertConfigUnits(
 const isNonIndexable = (val: unknown) =>
     typeof val !== 'object' || val === null;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export const isConfig = (value: unknown): value is Config =>
+    isRecord(value) && isRecord(value.label) && isRecord(value.sheet);
+
 export function normalizeConfig(config: unknown): Config {
     if (isNonIndexable(config)) return createDefaultConfig();
     const c = config as Record<string, unknown>;
-    const label = c.label ?? ({} as LabelConfig);
-    const sheet = c.sheet ?? ({} as SheetConfig);
-    const format = isPaperFormat(sheet.format) ? sheet.format : DEFAULT_FORMAT;
+    const label = isRecord(c.label) ? c.label : ({} as LabelConfig);
+    const sheet = isRecord(c.sheet) ? c.sheet : ({} as SheetConfig);
+    const format = isPaperFormat(sheet?.format) ? sheet.format : DEFAULT_FORMAT;
     const landscape = sheet.landscape === true;
     const paper = getPaperSize(format, landscape);
 
@@ -280,13 +280,14 @@ export function normalizeConfig(config: unknown): Config {
         labelHeight,
     );
 
-    const fontFamily =
-        label.fontFamily && FONT_FAMILIES.includes(label.fontFamily)
-            ? label.fontFamily
+    const fontFamily: FontFamily =
+        typeof label.fontFamily === 'string' &&
+        FONT_FAMILIES.includes(label.fontFamily as FontFamily)
+            ? (label.fontFamily as FontFamily)
             : DEFAULT_FONT_FAMILY;
     const fontWeight = fitFontPaddings(
         typeof label.fontWeight === 'number' ? label.fontWeight : 400,
-        FONT_WEIGHT_RANGES[fontFamily],
+        FONT_WEIGHT_RANGES[fontFamily as FontFamily],
     );
 
     return {
@@ -305,9 +306,11 @@ export function normalizeConfig(config: unknown): Config {
                     ? label.letterSpacing
                     : DEFAULT_LETTER_SPACING,
             text: typeof label.text === 'string' ? label.text : DEFAULT_TEXT,
-            textAlign: TEXT_ALIGN_OPTIONS.includes(label.textAlign)
-                ? label.textAlign
-                : DEFAULT_TEXT_ALIGN,
+            textAlign:
+                typeof label.textAlign === 'string' &&
+                TEXT_ALIGN_OPTIONS.includes(label.textAlign as TextAlign)
+                    ? (label.textAlign as TextAlign)
+                    : DEFAULT_TEXT_ALIGN,
             textWrap: Boolean(label.textWrap),
             textSize: clamp(
                 numberOr(label.textSize, DEFAULT_TEXT_SIZE),
@@ -323,9 +326,11 @@ export function normalizeConfig(config: unknown): Config {
                 typeof label.borderColor === 'string'
                     ? label.borderColor
                     : DEFAULT_BORDER_COLOR,
-            borderStyle: BORDER_STYLES.includes(label.borderStyle)
-                ? label.borderStyle
-                : DEFAULT_BORDER_STYLE,
+            borderStyle:
+                typeof label.borderStyle === 'string' &&
+                BORDER_STYLES.includes(label.borderStyle as BorderStyle)
+                    ? (label.borderStyle as BorderStyle)
+                    : DEFAULT_BORDER_STYLE,
             borderWidth: clamp(
                 numberOr(label.borderWidth, DEFAULT_BORDER_WIDTH),
                 0,

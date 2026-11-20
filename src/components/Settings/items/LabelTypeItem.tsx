@@ -21,9 +21,8 @@ import {
     FONT_WEIGHT_RANGES,
     isLabelType,
     TEXT_SIZE_MAX,
-    type FontFamily,
     BORDER_STYLES,
-    BorderStyle,
+    FontFamily,
 } from '@/domain/config';
 import { cn } from '@/lib/cn';
 import { useConfigStore, useLabel } from '@/store';
@@ -34,7 +33,7 @@ import {
     AlignJustify,
     WrapText,
 } from 'lucide-react';
-import { ComponentPropsWithRef } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 
 export function LabelTypeItem() {
     const label = useLabel();
@@ -74,7 +73,9 @@ export function LabelTypeItem() {
                                 id="font-family-select"
                                 value={label.fontFamily}
                                 onValueChange={(fontFamily) =>
-                                    updateLabel({ fontFamily })
+                                    updateLabel({
+                                        fontFamily: fontFamily as FontFamily,
+                                    })
                                 }
                             >
                                 <SelectTrigger className="w-full grow">
