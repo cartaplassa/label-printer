@@ -1,5 +1,11 @@
 import type { ClassValue } from 'clsx';
-import { Minus, PanelRightClose, PanelRightOpen, Plus, RotateCcw } from 'lucide-react';
+import {
+    Minus,
+    PanelRightClose,
+    PanelRightOpen,
+    Plus,
+    RotateCcw,
+} from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import {
     TransformComponent,
@@ -23,7 +29,7 @@ function Sheet({ className, ...rest }: SheetProps) {
     return (
         <div
             id="PRINTAREA"
-            className={cn('bg-white dark:bg-stone-700', className)}
+            className={cn('bg-white dark:bg-[#FFFAED]', className)}
             style={{
                 width: formatLength(paper.width, paper.unit),
                 height: formatLength(paper.height, paper.unit),
@@ -118,7 +124,10 @@ const Controls = ({
 };
 
 interface PageProps
-    extends Omit<ComponentPropsWithoutRef<typeof TransformWrapper>, 'children'> {
+    extends Omit<
+        ComponentPropsWithoutRef<typeof TransformWrapper>,
+        'children'
+    > {
     className?: ClassValue;
     desktopSidebarCollapsed?: boolean;
     onToggleDesktopSidebar?: () => void;
@@ -138,7 +147,12 @@ function Page({
             initialPositionY={0}
             {...rest}
         >
-            <div className={cn('relative h-full w-full min-w-0 min-h-0', className)}>
+            <div
+                className={cn(
+                    'relative h-full w-full min-w-0 min-h-0',
+                    className,
+                )}
+            >
                 <Controls
                     desktopSidebarCollapsed={desktopSidebarCollapsed}
                     onToggleDesktopSidebar={onToggleDesktopSidebar}
