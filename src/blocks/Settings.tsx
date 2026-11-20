@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link, Redirect, Route, Switch, useLocation } from 'wouter';
+import { Logo } from '@/components/Logo';
 import PrintButton from '@/components/PrintButton';
 import ReloadFrame from '@/components/ReloadFrame';
 import RepoLink from '@/components/RepoLink';
@@ -53,6 +54,7 @@ export function SettingsContent({
     return (
         <div className="flex h-full min-h-0 flex-col gap-2">
             <div className="flex items-center gap-2">
+                <Logo className="size-6 shrink-0" />
                 <h1 className="font-semibold">label-printer</h1>
                 <div className="grow" />
                 <PrintButton />
