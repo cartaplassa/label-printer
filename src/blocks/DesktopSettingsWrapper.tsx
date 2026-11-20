@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { SettingsContent } from './Settings';
 
-export const SETTINGS_MIN_WIDTH = 320;
+export const SETTINGS_MIN_WIDTH = 385;
 export const SETTINGS_MAX_WIDTH = 720;
 export const SETTINGS_DEFAULT_WIDTH = 420;
 

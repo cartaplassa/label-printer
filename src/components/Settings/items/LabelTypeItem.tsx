@@ -35,6 +35,16 @@ import {
 } from 'lucide-react';
 import type { ComponentPropsWithRef } from 'react';
 
+const Row = ({
+    className,
+    children,
+    ...rest
+}: ComponentPropsWithRef<'div'>) => (
+    <div className={cn('flex items-center gap-2', className)} {...rest}>
+        {children}
+    </div>
+);
+
 export function LabelTypeItem() {
     const label = useLabel();
     const updateLabel = useConfigStore((state) => state.updateLabel);
@@ -66,7 +76,7 @@ export function LabelTypeItem() {
                             }
                             value={label.text}
                         />
-                        <div className="flex items-center gap-2">
+                        <Row>
                             <label htmlFor="font-family-select">Font</label>
                             <Select
                                 disabled={label.type !== 'text'}
@@ -130,34 +140,40 @@ export function LabelTypeItem() {
                             >
                                 <AlignRight />
                             </Button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label htmlFor="text-color-selector">
-                                Text&nbsp;color
-                            </label>
-                            <ColorPickerPreset
-                                disabled={label.type !== 'text'}
-                                id="text-color-selector"
-                                value={label.textColor}
-                                onValueChange={(textColor: string) =>
-                                    updateLabel({ textColor })
-                                }
-                            />
-                            <label htmlFor="wrap-control">Wrap</label>
-                            <Button
-                                id="wrap-control"
-                                disabled={label.type !== 'text'}
-                                onClick={() =>
-                                    updateLabel({ textWrap: !label.textWrap })
-                                }
-                            >
-                                {label.textWrap ? (
-                                    <WrapText />
-                                ) : (
-                                    <AlignJustify />
-                                )}
-                            </Button>
-                        </div>
+                        </Row>
+                        <Row className="justify-between">
+                            <Row>
+                                <label htmlFor="text-color-selector">
+                                    Text&nbsp;color
+                                </label>
+                                <ColorPickerPreset
+                                    disabled={label.type !== 'text'}
+                                    id="text-color-selector"
+                                    value={label.textColor}
+                                    onValueChange={(textColor: string) =>
+                                        updateLabel({ textColor })
+                                    }
+                                />
+                            </Row>
+                            <Row>
+                                <label htmlFor="wrap-control">Wrap</label>
+                                <Button
+                                    id="wrap-control"
+                                    disabled={label.type !== 'text'}
+                                    onClick={() =>
+                                        updateLabel({
+                                            textWrap: !label.textWrap,
+                                        })
+                                    }
+                                >
+                                    {label.textWrap ? (
+                                        <WrapText />
+                                    ) : (
+                                        <AlignJustify />
+                                    )}
+                                </Button>
+                            </Row>
+                        </Row>
                         <NumberSetter
                             disabled={label.type !== 'text'}
                             label="Font size"
@@ -220,7 +236,7 @@ export function LabelTypeItem() {
                 max={BORDER_WIDTH_MAX}
                 step={0.01}
             />
-            <div className="flex items-center gap-2">
+            <Row>
                 <label htmlFor="border-color-selector">Color</label>
                 <ColorPickerPreset
                     id="border-color-selector"
@@ -262,7 +278,7 @@ export function LabelTypeItem() {
                         </SelectGroup>
                     </SelectContent>
                 </Select>
-            </div>
+            </Row>
         </PositionsAccordionItem>
     );
 }
