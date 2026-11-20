@@ -79,6 +79,16 @@ export interface Config {
     sheet: SheetConfig;
 }
 
+export type LabelSizingConfig = Pick<
+    LabelConfig,
+    'width' | 'height' | 'paddings'
+>;
+
+export interface SizingConfig {
+    sheet: SheetConfig;
+    label: LabelSizingConfig;
+}
+
 type PartialNullable<T> = {
     [P in keyof T]?: T[P] | null | undefined;
 };
@@ -367,3 +377,40 @@ export const ConfigSchema = z
 export function normalizeConfig(config: unknown): Config {
     return ConfigSchema.parse(config);
 }
+
+export function getSizingConfig(config: Config): SizingConfig {
+    return {
+        sheet: config.sheet,
+        label: {
+            width: config.label.width,
+            height: config.label.height,
+            paddings: config.label.paddings,
+        },
+    };
+}
+
+export function applySizingConfig(
+    config: Config,
+    sizing: SizingConfig,
+): Config {
+    return normalizeConfig({
+        ...config,
+        sheet: sizing.sheet,
+        label: { ...config.label, ...sizing.label },
+    });
+}
+
+export const SizingConfigSchema = z
+    .unknown()
+    .transform((input): SizingConfig => {
+        const source = isRecord(input) ? input : {};
+        const label = isRecord(source.label) ? source.label : {};
+        const sheet = isRecord(source.sheet) ? source.sheet : {};
+
+        return getSizingConfig(
+            normalizeConfig({
+                label: { ...createDefaultLabelConfig(), ...label },
+                sheet,
+            }),
+        );
+    });

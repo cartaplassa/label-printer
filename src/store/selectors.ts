@@ -1,5 +1,10 @@
 import { useMemo } from 'react';
-import type { LabelConfig, SheetConfig } from '@/domain/config';
+import {
+    getSizingConfig,
+    type LabelConfig,
+    type SheetConfig,
+    type SizingConfig,
+} from '@/domain/config';
 import { computeGridLayout, type GridLayout } from '@/domain/layout';
 import { getPaperSize, type PaperSize } from '@/domain/paper';
 import { useConfigStore } from './config';
@@ -9,6 +14,13 @@ export const useLabel = (): LabelConfig =>
 
 export const useSheet = (): SheetConfig =>
     useConfigStore((state) => state.sheet);
+
+export function useSizing(): SizingConfig {
+    const label = useLabel();
+    const sheet = useSheet();
+
+    return useMemo(() => getSizingConfig({ label, sheet }), [label, sheet]);
+}
 
 export function usePaperSize(): PaperSize {
     const format = useConfigStore((state) => state.sheet.format);

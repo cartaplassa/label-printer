@@ -1,7 +1,8 @@
+import { z } from 'zod';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { z } from 'zod';
 import {
+    applySizingConfig,
     type Config,
     convertConfigUnits,
     createDefaultConfig,
@@ -9,6 +10,7 @@ import {
     type LabelPatch,
     normalizeConfig,
     type SheetPatch,
+    type SizingConfig,
 } from '@/domain/config';
 import {
     getPaperSize,
@@ -26,6 +28,7 @@ export interface ConfigActions {
     setLabelPadding: (side: Side, value: number) => void;
     updateSheet: (patch: SheetPatch) => void;
     setSheetPadding: (side: Side, value: number) => void;
+    applySizing: (sizing: SizingConfig) => void;
     resetLabelImage: () => void;
     resetConfig: () => void;
 }
@@ -204,6 +207,8 @@ export const useConfigStore = create<ConfigStore>()(
                             },
                         }),
                     ),
+                applySizing: (sizing) =>
+                    setConfig((config) => applySizingConfig(config, sizing)),
                 resetLabelImage: () =>
                     setConfig((config) =>
                         normalizeConfig({
