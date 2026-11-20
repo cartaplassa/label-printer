@@ -4,7 +4,6 @@ import { Link, Redirect, Route, Switch, useLocation } from 'wouter';
 import PrintButton from '@/components/PrintButton';
 import ReloadFrame from '@/components/ReloadFrame';
 import RepoLink from '@/components/RepoLink';
-import { LabelContentPanel } from '@/components/Content/LabelContentPanel';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { QueueTab } from './QueueTab';
 import { SizingTab } from './SizingTab';
+import { ContentTab } from './ContentTab';
 
 const tabs = [
     { href: '/content', label: 'Content' },
@@ -35,7 +35,10 @@ function SettingsTabs() {
     const [location] = useLocation();
 
     return (
-        <nav className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1" aria-label="Settings sections">
+        <nav
+            className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1"
+            aria-label="Settings sections"
+        >
             {tabs.map((tab) => {
                 const active = location === tab.href;
                 return (
@@ -58,7 +61,11 @@ function SettingsTabs() {
     );
 }
 
-export function SettingsContent({ headerAction }: { headerAction?: ReactNode }) {
+export function SettingsContent({
+    headerAction,
+}: {
+    headerAction?: ReactNode;
+}) {
     const { format, landscape } = useSheet();
     const setPaperFormat = useConfigStore((state) => state.setPaperFormat);
     const toggleLandscape = useConfigStore((state) => state.toggleLandscape);
@@ -115,8 +122,11 @@ export function SettingsContent({ headerAction }: { headerAction?: ReactNode }) 
             <SettingsTabs />
             <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                 <Switch>
-                    <Route path="/" component={() => <Redirect to="/content" />} />
-                    <Route path="/content" component={LabelContentPanel} />
+                    <Route
+                        path="/"
+                        component={() => <Redirect to="/content" />}
+                    />
+                    <Route path="/content" component={ContentTab} />
                     <Route path="/sizing" component={SizingTab} />
                     <Route path="/queue" component={QueueTab} />
                     <Route component={() => <Redirect to="/content" />} />

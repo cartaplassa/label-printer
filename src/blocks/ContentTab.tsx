@@ -44,41 +44,109 @@ const Row = ({
     </div>
 );
 
-export function LabelContentPanel() {
+export function ContentTab() {
     const label = useLabel();
     const updateLabel = useConfigStore((state) => state.updateLabel);
 
     return (
         <div className="flex flex-col gap-4 text-balance">
+            <div className="flex flex-col gap-4">
+                <NumberSetter
+                    label="Border"
+                    unit="pt"
+                    value={label.borderWidth}
+                    setValue={(borderWidth) => updateLabel({ borderWidth })}
+                    max={BORDER_WIDTH_MAX}
+                    step={0.01}
+                />
+                <Row>
+                    <label htmlFor="border-color-selector">Color</label>
+                    <ColorPickerPreset
+                        id="border-color-selector"
+                        value={label.borderColor}
+                        onValueChange={(borderColor: string) =>
+                            updateLabel({ borderColor })
+                        }
+                    />
+                    <label htmlFor="border-style-select">Style</label>
+                    <Select
+                        value={label.borderStyle}
+                        onValueChange={(borderStyle) =>
+                            updateLabel({
+                                borderStyle:
+                                    borderStyle as typeof label.borderStyle,
+                            })
+                        }
+                    >
+                        <SelectTrigger
+                            id="border-style-select"
+                            className="w-full grow"
+                        >
+                            <SelectValue
+                                render={(props, state) => (
+                                    <BorderStyleShowcase
+                                        borderStyle={String(state.value)}
+                                        {...props}
+                                    />
+                                )}
+                            />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                {BORDER_STYLES.map((borderStyle) => (
+                                    <SelectItem
+                                        key={borderStyle}
+                                        value={borderStyle}
+                                    >
+                                        <BorderStyleShowcase
+                                            borderStyle={borderStyle}
+                                        />
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                </Row>
+            </div>
+
             <RadioGroup
                 onValueChange={(value) => {
                     if (isLabelType(value)) updateLabel({ type: value });
                 }}
                 value={label.type}
+                className="flex flex-col gap-2"
             >
                 <Field orientation="horizontal">
                     <RadioGroupItem id="label-type-image" value="image" />
                     <FieldContent>
                         <label htmlFor="label-type-image">Image</label>
-                        <FilePickerTrigger disabled={label.type !== 'image'} />
                     </FieldContent>
                 </Field>
                 <Field orientation="horizontal">
                     <RadioGroupItem id="label-type-text" value="text" />
                     <FieldContent>
                         <label htmlFor="label-type-text">Text</label>
+                    </FieldContent>
+                </Field>
+            </RadioGroup>
+
+            <div className="flex flex-col gap-4">
+                {label.type === 'image' ? (
+                    <FilePickerTrigger />
+                ) : (
+                    <>
                         <ExpandableTextarea
                             className=""
-                            disabled={label.type !== 'text'}
                             onChange={(event) =>
-                                updateLabel({ text: event.target.value })
+                                updateLabel({
+                                    text: event.target.value,
+                                })
                             }
                             value={label.text}
                         />
                         <Row>
                             <label htmlFor="font-family-select">Font</label>
                             <Select
-                                disabled={label.type !== 'text'}
                                 value={label.fontFamily}
                                 onValueChange={(fontFamily) =>
                                     updateLabel({
@@ -86,7 +154,10 @@ export function LabelContentPanel() {
                                     })
                                 }
                             >
-                                <SelectTrigger id="font-family-select" className="w-full grow">
+                                <SelectTrigger
+                                    id="font-family-select"
+                                    className="w-full grow"
+                                >
                                     <SelectValue placeholder={FONT_FALLBACK} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -100,7 +171,6 @@ export function LabelContentPanel() {
                                 </SelectContent>
                             </Select>
                             <Button
-                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'left'
                                         ? 'default'
@@ -113,7 +183,6 @@ export function LabelContentPanel() {
                                 <AlignLeft />
                             </Button>
                             <Button
-                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'center'
                                         ? 'default'
@@ -126,7 +195,6 @@ export function LabelContentPanel() {
                                 <AlignCenter />
                             </Button>
                             <Button
-                                disabled={label.type !== 'text'}
                                 variant={
                                     label.textAlign === 'right'
                                         ? 'default'
@@ -145,7 +213,6 @@ export function LabelContentPanel() {
                                     Text&nbsp;color
                                 </label>
                                 <ColorPickerPreset
-                                    disabled={label.type !== 'text'}
                                     id="text-color-selector"
                                     value={label.textColor}
                                     onValueChange={(textColor: string) =>
@@ -157,7 +224,6 @@ export function LabelContentPanel() {
                                 <label htmlFor="wrap-control">Wrap</label>
                                 <Button
                                     id="wrap-control"
-                                    disabled={label.type !== 'text'}
                                     onClick={() =>
                                         updateLabel({
                                             textWrap: !label.textWrap,
@@ -173,7 +239,6 @@ export function LabelContentPanel() {
                             </Row>
                         </Row>
                         <NumberSetter
-                            disabled={label.type !== 'text'}
                             label="Font size"
                             unit="pt"
                             value={label.textSize}
@@ -182,7 +247,6 @@ export function LabelContentPanel() {
                             step={0.5}
                         />
                         <NumberSetter
-                            disabled={label.type !== 'text'}
                             value={label.fontWeight}
                             setValue={(fontWeight) =>
                                 updateLabel({ fontWeight })
@@ -201,7 +265,6 @@ export function LabelContentPanel() {
                             }
                         />
                         <NumberSetter
-                            disabled={label.type !== 'text'}
                             value={label.lineHeight}
                             setValue={(lineHeight) =>
                                 updateLabel({ lineHeight })
@@ -212,7 +275,6 @@ export function LabelContentPanel() {
                             max={2}
                         />
                         <NumberSetter
-                            disabled={label.type !== 'text'}
                             value={label.letterSpacing}
                             setValue={(letterSpacing) =>
                                 updateLabel({ letterSpacing })
@@ -223,59 +285,9 @@ export function LabelContentPanel() {
                             min={-0.3}
                             max={1}
                         />
-                    </FieldContent>
-                </Field>
-            </RadioGroup>
-            <NumberSetter
-                label="Border"
-                unit="pt"
-                value={label.borderWidth}
-                setValue={(borderWidth) => updateLabel({ borderWidth })}
-                max={BORDER_WIDTH_MAX}
-                step={0.01}
-            />
-            <Row>
-                <label htmlFor="border-color-selector">Color</label>
-                <ColorPickerPreset
-                    id="border-color-selector"
-                    value={label.borderColor}
-                    onValueChange={(borderColor: string) =>
-                        updateLabel({ borderColor })
-                    }
-                />
-                <label htmlFor="border-style-select">Style</label>
-                <Select
-                    value={label.borderStyle}
-                    onValueChange={(borderStyle) =>
-                        updateLabel({ borderStyle: borderStyle as typeof label.borderStyle })
-                    }
-                >
-                    <SelectTrigger id="border-style-select" className="w-full grow">
-                        <SelectValue
-                            render={(props, state) => (
-                                <BorderStyleShowcase
-                                    borderStyle={String(state.value)}
-                                    {...props}
-                                />
-                            )}
-                        />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            {BORDER_STYLES.map((borderStyle) => (
-                                <SelectItem
-                                    key={borderStyle}
-                                    value={borderStyle}
-                                >
-                                    <BorderStyleShowcase
-                                        borderStyle={borderStyle}
-                                    />
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
-            </Row>
+                    </>
+                )}
+            </div>
         </div>
     );
 }
