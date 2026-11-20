@@ -1,6 +1,6 @@
 import { NumberSetter } from '@/components/NumberSetter';
 import { useConfigStore, useLabel, usePaperSize, useSheet } from '@/store';
-import { PositionsAccordionItem } from '../PositionsAccordionItem';
+import { PositionsAccordionItem } from './PositionsAccordionItem';
 
 export function SheetGapItem() {
     const { gapX, gapY } = useSheet();

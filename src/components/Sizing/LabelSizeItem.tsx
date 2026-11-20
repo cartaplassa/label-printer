@@ -1,6 +1,6 @@
 import { NumberSetter } from '@/components/NumberSetter';
 import { useConfigStore, useLabel, usePaperSize } from '@/store';
-import { PositionsAccordionItem } from '../PositionsAccordionItem';
+import { PositionsAccordionItem } from './PositionsAccordionItem';
 
 export function LabelSizeItem() {
     const { width, height } = useLabel();

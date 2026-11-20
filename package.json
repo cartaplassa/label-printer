@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite",
         "dev:host": "vite --host",
-        "build": "tsc -b && vite build",
+        "build": "tsc -b && vite build && cp dist/index.html dist/404.html",
         "lint": "eslint .",
         "preview": "vite preview",
         "act": "act workflow_dispatch"
@@ -32,6 +32,7 @@
         "shadcn": "^4.23.0",
         "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.3",
+        "wouter": "^3.13.0",
         "zod": "^4.6.7",
         "zustand": "^5.0.16"
     },

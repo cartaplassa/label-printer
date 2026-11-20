@@ -1,8 +1,7 @@
 import { ColorPickerPreset } from '@/components/ColorPickerPreset';
 import { ExpandableTextarea } from '@/components/ExpandableTextarea';
 import { NumberSetter } from '@/components/NumberSetter';
-import FilePickerTrigger from '@/components/Settings/FilePickerTrigger';
-import { PositionsAccordionItem } from '@/components/Settings/PositionsAccordionItem';
+import FilePickerTrigger from '@/components/Content/FilePickerTrigger';
 import { Button } from '@/components/ui/button';
 import { Field, FieldContent } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -45,12 +44,12 @@ const Row = ({
     </div>
 );
 
-export function LabelTypeItem() {
+export function LabelContentPanel() {
     const label = useLabel();
     const updateLabel = useConfigStore((state) => state.updateLabel);
 
     return (
-        <PositionsAccordionItem value="label" title="Label">
+        <div className="flex flex-col gap-4 text-balance">
             <RadioGroup
                 onValueChange={(value) => {
                     if (isLabelType(value)) updateLabel({ type: value });
@@ -80,7 +79,6 @@ export function LabelTypeItem() {
                             <label htmlFor="font-family-select">Font</label>
                             <Select
                                 disabled={label.type !== 'text'}
-                                id="font-family-select"
                                 value={label.fontFamily}
                                 onValueChange={(fontFamily) =>
                                     updateLabel({
@@ -88,7 +86,7 @@ export function LabelTypeItem() {
                                     })
                                 }
                             >
-                                <SelectTrigger className="w-full grow">
+                                <SelectTrigger id="font-family-select" className="w-full grow">
                                     <SelectValue placeholder={FONT_FALLBACK} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -247,17 +245,16 @@ export function LabelTypeItem() {
                 />
                 <label htmlFor="border-style-select">Style</label>
                 <Select
-                    id="border-style-select"
                     value={label.borderStyle}
                     onValueChange={(borderStyle) =>
-                        updateLabel({ borderStyle })
+                        updateLabel({ borderStyle: borderStyle as typeof label.borderStyle })
                     }
                 >
-                    <SelectTrigger className="w-full grow">
+                    <SelectTrigger id="border-style-select" className="w-full grow">
                         <SelectValue
                             render={(props, state) => (
                                 <BorderStyleShowcase
-                                    borderStyle={state.value}
+                                    borderStyle={String(state.value)}
                                     {...props}
                                 />
                             )}
@@ -279,7 +276,7 @@ export function LabelTypeItem() {
                     </SelectContent>
                 </Select>
             </Row>
-        </PositionsAccordionItem>
+        </div>
     );
 }
 
@@ -289,7 +286,6 @@ type BorderStyleShowcaseProps = ComponentPropsWithRef<'div'> & {
 
 const BorderStyleShowcase = ({
     borderStyle,
-    style,
     className,
     ...rest
 }: BorderStyleShowcaseProps) => (

@@ -3,7 +3,7 @@ import { paddingLimit } from '@/domain/config';
 import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
 import { useConfigStore, usePaperSize, useSheet } from '@/store';
-import { PositionsAccordionItem } from '../PositionsAccordionItem';
+import { PositionsAccordionItem } from './PositionsAccordionItem';
 
 export function SheetPaddingsItem() {
     const { paddings } = useSheet();
