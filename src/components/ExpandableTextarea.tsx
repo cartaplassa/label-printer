@@ -4,7 +4,7 @@ import { cn } from '@/lib/cn';
 import { Textarea } from './ui/textarea';
 
 const BASE_STYLES =
-    'wrap-break-word border overflow-hidden p-2 text-md tracking-normal';
+    'wrap-break-word border overflow-hidden p-2 text-md md:text-sm tracking-normal';
 const GRID_CELL = 'col-start-1 col-end-2 row-start-2 row-end-3';
 const FIELD_STYLE =
     'leading-tight placeholder:select-none focus-visible:outline-none';
