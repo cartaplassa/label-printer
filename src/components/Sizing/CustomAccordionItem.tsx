@@ -1,30 +1,30 @@
-import { cn } from '@/lib/cn';
+import type { ComponentPropsWithoutRef } from 'react';
 import {
     AccordionContent,
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
-import type { ComponentPropsWithoutRef } from 'react';
+import { cn } from '@/lib/cn';
 
-interface PositionsAccordionItemProps
+interface CustomAccordionItemProps
     extends ComponentPropsWithoutRef<typeof AccordionItem> {
     isGrid?: boolean;
 }
 
-export function PositionsAccordionItem({
+export function CustomAccordionItem({
     className,
     value,
     title,
     children,
     isGrid,
     ...rest
-}: PositionsAccordionItemProps) {
+}: CustomAccordionItemProps) {
     return (
         <AccordionItem className={cn('', className)} {...{ value, ...rest }}>
             <AccordionTrigger>{title}</AccordionTrigger>
             <AccordionContent
                 className={cn(
-                    'gap-4 text-balance',
+                    'gap-4 text-balance overflow-visible p-1',
                     isGrid
                         ? 'grid grid-cols-[min-content_1fr_min-content]'
                         : 'flex flex-col',

@@ -7,13 +7,9 @@ import {
     X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import {
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { useSizingPresetsStore } from '@/store';
+import { CustomAccordionItem } from './CustomAccordionItem';
 import { PresetForm } from './PresetForm';
 import { PresetRow } from './PresetRow';
 
@@ -70,71 +66,65 @@ export function PresetItem() {
     };
 
     return (
-        <AccordionItem value="saved-presets">
-            <AccordionTrigger>Saved presets</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-3">
-                <PresetForm />
-                <div className="flex items-center gap-2">
-                    {isEditMode ? (
-                        <>
-                            <Button
-                                variant="outline"
-                                disabled={selectedIds.size === 0 || isCopied}
-                                onClick={handleExportSelected}
-                                title="Copy selected presets as JSON"
-                            >
-                                {isCopied ? <Check /> : <Download />}
-                                {isCopied ? 'Copied' : 'Export'}
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                disabled={selectedIds.size === 0}
-                                onClick={handleRemoveSelected}
-                            >
-                                <Trash2 />
-                                Remove
-                            </Button>
-                            <Button variant="ghost" onClick={cancelEdit}>
-                                <X />
-                                Cancel
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button
-                                variant="outline"
-                                title="Not implemented yet"
-                            >
-                                <ClipboardPaste />
-                                Import from clipboard
-                            </Button>
-                            <Button variant="outline" onClick={startEdit}>
-                                <ListChecks />
-                                Edit
-                            </Button>
-                        </>
-                    )}
-                </div>
-                {presets.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">
-                        No saved presets yet. Name the current sheet sizing to
-                        save it here.
-                    </p>
+        <CustomAccordionItem value="saved-presets" title="Saved presets">
+            <PresetForm />
+            <div className="flex items-center gap-2">
+                {isEditMode ? (
+                    <>
+                        <Button
+                            variant="outline"
+                            disabled={selectedIds.size === 0 || isCopied}
+                            onClick={handleExportSelected}
+                            title="Copy selected presets as JSON"
+                        >
+                            {isCopied ? <Check /> : <Download />}
+                            {isCopied ? 'Copied' : 'Export'}
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            disabled={selectedIds.size === 0}
+                            onClick={handleRemoveSelected}
+                        >
+                            <Trash2 />
+                            Remove
+                        </Button>
+                        <Button variant="ghost" onClick={cancelEdit}>
+                            <X />
+                            Cancel
+                        </Button>
+                    </>
                 ) : (
-                    <ul className="flex flex-col gap-1">
-                        {presets.map((preset) => (
-                            <li key={preset.id}>
-                                <PresetRow
-                                    preset={preset}
-                                    isEditMode={isEditMode}
-                                    isSelected={selectedIds.has(preset.id)}
-                                    onToggleSelected={toggleSelected}
-                                />
-                            </li>
-                        ))}
-                    </ul>
+                    <>
+                        <Button variant="outline" title="Not implemented yet">
+                            <ClipboardPaste />
+                            Import from clipboard
+                        </Button>
+                        <Button variant="outline" onClick={startEdit}>
+                            <ListChecks />
+                            Edit
+                        </Button>
+                    </>
                 )}
-            </AccordionContent>
-        </AccordionItem>
+            </div>
+            {presets.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                    No saved presets yet. Name the current sheet sizing to save
+                    it here.
+                </p>
+            ) : (
+                <ul className="flex flex-col gap-1">
+                    {presets.map((preset) => (
+                        <li key={preset.id}>
+                            <PresetRow
+                                preset={preset}
+                                isEditMode={isEditMode}
+                                isSelected={selectedIds.has(preset.id)}
+                                onToggleSelected={toggleSelected}
+                            />
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </CustomAccordionItem>
     );
 }

@@ -130,13 +130,12 @@ export function ContentTab() {
                 </Field>
             </RadioGroup>
 
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 px-1">
                 {label.type === 'image' ? (
                     <FilePickerTrigger />
                 ) : (
                     <>
                         <ExpandableTextarea
-                            className=""
                             onChange={(event) =>
                                 updateLabel({
                                     text: event.target.value,

@@ -3,7 +3,7 @@ import { paddingLimit } from '@/domain/config';
 import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
 import { useConfigStore, useLabel, usePaperSize } from '@/store';
-import { PositionsAccordionItem } from './PositionsAccordionItem';
+import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function LabelPaddingsItem() {
     const label = useLabel();
@@ -11,7 +11,7 @@ export function LabelPaddingsItem() {
     const setLabelPadding = useConfigStore((state) => state.setLabelPadding);
 
     return (
-        <PositionsAccordionItem
+        <CustomAccordionItem
             value="label-paddings"
             title="Label paddings"
             isGrid
@@ -27,6 +27,6 @@ export function LabelPaddingsItem() {
                     label={capitalize(side)}
                 />
             ))}
-        </PositionsAccordionItem>
+        </CustomAccordionItem>
     );
 }

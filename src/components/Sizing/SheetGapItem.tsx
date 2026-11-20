@@ -1,6 +1,6 @@
 import { NumberSetter } from '@/components/NumberSetter';
 import { useConfigStore, useLabel, usePaperSize, useSheet } from '@/store';
-import { PositionsAccordionItem } from './PositionsAccordionItem';
+import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function SheetGapItem() {
     const { gapX, gapY } = useSheet();
@@ -9,7 +9,7 @@ export function SheetGapItem() {
     const updateSheet = useConfigStore((state) => state.updateSheet);
 
     return (
-        <PositionsAccordionItem isGrid value="sheet-gap" title="Sheet gap">
+        <CustomAccordionItem isGrid value="sheet-gap" title="Sheet gap">
             <NumberSetter
                 isSubgrid
                 value={gapX}
@@ -26,6 +26,6 @@ export function SheetGapItem() {
                 unit={unit}
                 label="Y gap"
             />
-        </PositionsAccordionItem>
+        </CustomAccordionItem>
     );
 }

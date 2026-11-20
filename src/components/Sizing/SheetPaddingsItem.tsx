@@ -3,7 +3,7 @@ import { paddingLimit } from '@/domain/config';
 import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
 import { useConfigStore, usePaperSize, useSheet } from '@/store';
-import { PositionsAccordionItem } from './PositionsAccordionItem';
+import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function SheetPaddingsItem() {
     const { paddings } = useSheet();
@@ -11,7 +11,7 @@ export function SheetPaddingsItem() {
     const setSheetPadding = useConfigStore((state) => state.setSheetPadding);
 
     return (
-        <PositionsAccordionItem
+        <CustomAccordionItem
             value="sheet-paddings"
             title="Sheet paddings"
             isGrid
@@ -27,6 +27,6 @@ export function SheetPaddingsItem() {
                     label={capitalize(side)}
                 />
             ))}
-        </PositionsAccordionItem>
+        </CustomAccordionItem>
     );
 }

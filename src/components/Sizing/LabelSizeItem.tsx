@@ -1,6 +1,6 @@
 import { NumberSetter } from '@/components/NumberSetter';
 import { useConfigStore, useLabel, usePaperSize } from '@/store';
-import { PositionsAccordionItem } from './PositionsAccordionItem';
+import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function LabelSizeItem() {
     const { width, height } = useLabel();
@@ -8,7 +8,7 @@ export function LabelSizeItem() {
     const updateLabel = useConfigStore((state) => state.updateLabel);
 
     return (
-        <PositionsAccordionItem value="label-size" title="Label size" isGrid>
+        <CustomAccordionItem value="label-size" title="Label size" isGrid>
             <NumberSetter
                 isSubgrid
                 value={width}
@@ -25,6 +25,6 @@ export function LabelSizeItem() {
                 unit={unit}
                 label="Height"
             />
-        </PositionsAccordionItem>
+        </CustomAccordionItem>
     );
 }
