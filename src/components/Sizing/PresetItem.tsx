@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useSizingPresetsStore } from '@/store';
+import { SizingPresetsSchema, useSizingPresetsStore } from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 import { PresetForm } from './PresetForm';
 import { PresetRow } from './PresetRow';
@@ -16,28 +16,31 @@ import { PresetRow } from './PresetRow';
 export function PresetItem() {
     const presets = useSizingPresetsStore((state) => state.presets);
     const deletePresets = useSizingPresetsStore((state) => state.deletePresets);
+    const importPresets = useSizingPresetsStore((state) => state.importPresets);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(
         () => new Set(),
     );
-    const [isCopied, setIsCopied] = useState(false);
+    const [feedback, setFeedback] = useState<'copied' | 'imported' | null>(
+        null,
+    );
 
     useEffect(() => {
-        if (!isCopied) return;
+        if (!feedback) return;
 
-        const timeout = window.setTimeout(() => setIsCopied(false), 1000);
+        const timeout = window.setTimeout(() => setFeedback(null), 1000);
         return () => window.clearTimeout(timeout);
-    }, [isCopied]);
+    }, [feedback]);
 
     const startEdit = () => {
         setSelectedIds(new Set());
-        setIsCopied(false);
+        setFeedback(null);
         setIsEditMode(true);
     };
 
     const cancelEdit = () => {
         setSelectedIds(new Set());
-        setIsCopied(false);
+        setFeedback(null);
         setIsEditMode(false);
     };
 
@@ -61,8 +64,24 @@ export function PresetItem() {
 
         navigator.clipboard
             .writeText(JSON.stringify(selected, null, 2))
-            .then(() => setIsCopied(true))
-            .catch(() => setIsCopied(false));
+            .then(() => setFeedback('copied'))
+            .catch(() => setFeedback(null));
+    };
+
+    const handleImportFromClipboard = async () => {
+        if (!navigator.clipboard) return;
+
+        try {
+            const text = await navigator.clipboard.readText();
+            const parsed = SizingPresetsSchema.safeParse(JSON.parse(text));
+
+            if (!parsed.success || parsed.data.length === 0) return;
+
+            importPresets(parsed.data);
+            setFeedback('imported');
+        } catch {
+            return;
+        }
     };
 
     return (
@@ -73,12 +92,14 @@ export function PresetItem() {
                     <>
                         <Button
                             variant="outline"
-                            disabled={selectedIds.size === 0 || isCopied}
+                            disabled={
+                                selectedIds.size === 0 || feedback === 'copied'
+                            }
                             onClick={handleExportSelected}
                             title="Copy selected presets as JSON"
                         >
-                            {isCopied ? <Check /> : <Download />}
-                            {isCopied ? 'Copied' : 'Export'}
+                            {feedback === 'copied' ? <Check /> : <Download />}
+                            {feedback === 'copied' ? 'Copied' : 'Export'}
                         </Button>
                         <Button
                             variant="destructive"
@@ -95,9 +116,20 @@ export function PresetItem() {
                     </>
                 ) : (
                     <>
-                        <Button variant="outline" title="Not implemented yet">
-                            <ClipboardPaste />
-                            Import from clipboard
+                        <Button
+                            variant="outline"
+                            disabled={feedback === 'imported'}
+                            onClick={handleImportFromClipboard}
+                            title="Paste presets copied as JSON"
+                        >
+                            {feedback === 'imported' ? (
+                                <Check />
+                            ) : (
+                                <ClipboardPaste />
+                            )}
+                            {feedback === 'imported'
+                                ? 'Imported'
+                                : 'Import from clipboard'}
                         </Button>
                         <Button variant="outline" onClick={startEdit}>
                             <ListChecks />

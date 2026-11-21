@@ -14,6 +14,7 @@ export interface SizingPresetsActions {
     renamePreset: (id: string, name: string) => void;
     deletePreset: (id: string) => void;
     deletePresets: (ids: string[]) => void;
+    importPresets: (presets: SizingPreset[]) => void;
 }
 
 export type SizingPresetsStore = {
@@ -37,9 +38,11 @@ const PresetSchema = z.object({
     sizing: SizingConfigSchema,
 });
 
+export const SizingPresetsSchema = z.array(PresetSchema);
+
 const PersistedPresetsSchema = z
     .object({
-        presets: z.array(PresetSchema).catch([]),
+        presets: SizingPresetsSchema.catch([]),
     })
     .catch({ presets: [] });
 
@@ -88,6 +91,33 @@ export const useSizingPresetsStore = create<SizingPresetsStore>()(
                     ),
                 }));
             },
+            importPresets: (imported) =>
+                set((state) => {
+                    const importedById = new Map<string, SizingPreset>();
+                    for (const preset of imported) {
+                        importedById.set(preset.id, {
+                            id: preset.id,
+                            name: normalizeName(preset.name),
+                            sizing: SizingConfigSchema.parse(preset.sizing),
+                        });
+                    }
+
+                    const existingIds = new Set(
+                        state.presets.map((preset) => preset.id),
+                    );
+
+                    return {
+                        presets: [
+                            ...state.presets.map(
+                                (preset) =>
+                                    importedById.get(preset.id) ?? preset,
+                            ),
+                            ...[...importedById.values()].filter(
+                                (preset) => !existingIds.has(preset.id),
+                            ),
+                        ],
+                    };
+                }),
         }),
         {
             name: 'labelPrinterSizingPresets',

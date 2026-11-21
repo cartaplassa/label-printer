@@ -14,5 +14,6 @@ export type {
 } from './sizingPresets';
 export {
     SIZING_PRESET_NAME_MAX_LENGTH,
+    SizingPresetsSchema,
     useSizingPresetsStore,
 } from './sizingPresets';
