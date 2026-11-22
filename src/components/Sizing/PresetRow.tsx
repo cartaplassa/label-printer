@@ -6,7 +6,12 @@ import {
     SquareCheck,
     X,
 } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import {
+    type ComponentPropsWithRef,
+    type SubmitEventHandler,
+    useEffect,
+    useState,
+} from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -15,6 +20,7 @@ import {
     useConfigStore,
     useSizingPresetsStore,
 } from '@/store';
+import { cn } from '@/lib/cn';
 
 interface PresetRowProps {
     preset: SizingPreset;
@@ -36,7 +42,7 @@ export function PresetRow({
     const trimmedName = name.trim();
 
     useEffect(() => {
-        if (isEditMode) setIsRenaming(false);
+        if (!isEditMode) setIsRenaming(false);
     }, [isEditMode]);
 
     const startRenaming = () => {
@@ -49,7 +55,7 @@ export function PresetRow({
         setIsRenaming(false);
     };
 
-    const handleRename = (event: FormEvent) => {
+    const handleRename: SubmitEventHandler<HTMLFormElement> = (event) => {
         event.preventDefault();
         if (!trimmedName) return;
 
@@ -57,31 +63,12 @@ export function PresetRow({
         setIsRenaming(false);
     };
 
-    if (isEditMode) {
-        return (
-            <div className="flex items-center gap-2">
-                <p className="min-w-0 [&&&]:mb-0 flex-1 truncate text-sm">
-                    {preset.name}
-                </p>
-                <Button
-                    variant={isSelected ? 'default' : 'outline'}
-                    onClick={() => onToggleSelected(preset.id)}
-                    aria-pressed={isSelected}
-                    aria-label={`${isSelected ? 'Deselect' : 'Select'} ${preset.name}`}
-                    title={isSelected ? 'Deselect' : 'Select'}
-                >
-                    {isSelected ? <SquareCheck /> : <Square />}
-                </Button>
-            </div>
-        );
-    }
-
     if (isRenaming) {
         return (
             <form onSubmit={handleRename} className="flex items-center gap-1">
                 <Input
                     aria-label="Configuration name"
-                    className="h-7"
+                    className="h-7 text-sm"
                     maxLength={SIZING_PRESET_NAME_MAX_LENGTH}
                     value={name}
                     autoFocus
@@ -111,19 +98,18 @@ export function PresetRow({
         );
     }
 
-    return (
-        <div className="flex items-center gap-2">
-            <p className="min-w-0 [&&&]:mb-0 flex-1 truncate text-sm">
-                {preset.name}
-            </p>
-            <div className="flex shrink-0 items-center gap-1">
+    if (isEditMode) {
+        return (
+            <div className="flex items-center gap-1">
+                <PresetName>{preset.name}</PresetName>
                 <Button
-                    variant="outline"
-                    onClick={() => applySizing(preset.sizing)}
-                    aria-label={`Apply ${preset.name}`}
-                    title="Apply configuration"
+                    variant={isSelected ? 'default' : 'outline'}
+                    onClick={() => onToggleSelected(preset.id)}
+                    aria-pressed={isSelected}
+                    aria-label={`${isSelected ? 'Deselect' : 'Select'} ${preset.name}`}
+                    title={isSelected ? 'Deselect' : 'Select'}
                 >
-                    <CornerDownLeft />
+                    {isSelected ? <SquareCheck /> : <Square />}
                 </Button>
                 <Button
                     variant="outline"
@@ -134,6 +120,35 @@ export function PresetRow({
                     <Pencil />
                 </Button>
             </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <PresetName>{preset.name}</PresetName>
+            <div className="flex shrink-0 items-center gap-1">
+                <Button
+                    variant="outline"
+                    onClick={() => applySizing(preset.sizing)}
+                    aria-label={`Apply ${preset.name}`}
+                    title="Apply configuration"
+                >
+                    <CornerDownLeft />
+                </Button>
+            </div>
         </div>
     );
 }
+
+const PresetName = ({
+    className,
+    children,
+    ...rest
+}: ComponentPropsWithRef<'p'>) => (
+    <p
+        className={cn('min-w-0 [&&&]:mb-0 flex-1 truncate text-sm pl-2.75')}
+        {...rest}
+    >
+        {children}
+    </p>
+);

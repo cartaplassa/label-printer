@@ -91,6 +91,7 @@ export function PresetItem() {
                 {isEditMode ? (
                     <>
                         <Button
+                            className="flex-1"
                             variant="outline"
                             disabled={
                                 selectedIds.size === 0 || feedback === 'copied'
@@ -102,6 +103,7 @@ export function PresetItem() {
                             {feedback === 'copied' ? 'Copied' : 'Export'}
                         </Button>
                         <Button
+                            className="flex-1"
                             variant="destructive"
                             disabled={selectedIds.size === 0}
                             onClick={handleRemoveSelected}
@@ -109,7 +111,11 @@ export function PresetItem() {
                             <Trash2 />
                             Remove
                         </Button>
-                        <Button variant="ghost" onClick={cancelEdit}>
+                        <Button
+                            className="flex-1"
+                            variant="ghost"
+                            onClick={cancelEdit}
+                        >
                             <X />
                             Cancel
                         </Button>
@@ -117,6 +123,7 @@ export function PresetItem() {
                 ) : (
                     <>
                         <Button
+                            className="flex-2"
                             variant="outline"
                             disabled={feedback === 'imported'}
                             onClick={handleImportFromClipboard}
@@ -131,7 +138,11 @@ export function PresetItem() {
                                 ? 'Imported'
                                 : 'Import from clipboard'}
                         </Button>
-                        <Button variant="outline" onClick={startEdit}>
+                        <Button
+                            className="flex-1"
+                            variant="outline"
+                            onClick={startEdit}
+                        >
                             <ListChecks />
                             Edit
                         </Button>
