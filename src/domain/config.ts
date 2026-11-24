@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import exampleImage from '@/assets/exampleImage';
+import { mapOfStructs } from '@/lib/mapOfStructs';
+import { BARCODE_TYPES, type BarcodeType } from './barcode';
 import {
     convertLength,
     getPaperSize,
@@ -15,48 +17,23 @@ import {
 export const LABEL_TYPES = ['text', 'image', 'barcode'] as const;
 export type LabelType = (typeof LABEL_TYPES)[number];
 
-export const BARCODE_TYPES = [
-    'code128',
-    'code39',
-    'ean13',
-    'upca',
-    'qrcode',
-    'datamatrix',
-] as const;
-export type BarcodeType = (typeof BARCODE_TYPES)[number];
-
-export const BARCODE_TYPE_LABELS: Record<BarcodeType, string> = {
-    code128: 'Code 128',
-    code39: 'Code 39',
-    ean13: 'EAN-13',
-    upca: 'UPC-A',
-    qrcode: 'QR Code',
-    datamatrix: 'Data Matrix',
-};
-
-export const isBarcodeType = (value: unknown): value is BarcodeType =>
-    BARCODE_TYPES.includes(value as BarcodeType);
-
 export const TEXT_ALIGN_OPTIONS = ['left', 'center', 'right'] as const;
 export type TextAlign = (typeof TEXT_ALIGN_OPTIONS)[number];
 
-export const FONT_FALLBACK = '<browser default>';
-export const FONT_FAMILY_OPTIONS = {
-    Inter: "'Inter Variable', sans-serif",
-    'JetBrains Mono': "'JetBrains Mono Variable', monospace",
-    'Playfair Display': "'Playfair Display Variable', serif",
-    Oxanium: "'Oxanium Variable', serif",
-    [FONT_FALLBACK]: 'system-ui',
-} as const;
-export type FontFamily = keyof typeof FONT_FAMILY_OPTIONS;
-export const FONT_FAMILIES = Object.keys(FONT_FAMILY_OPTIONS) as FontFamily[];
-export const FONT_WEIGHT_RANGES = {
-    Inter: [100, 900],
-    'JetBrains Mono': [100, 800],
-    'Playfair Display': [400, 900],
-    Oxanium: [200, 800],
-    [FONT_FALLBACK]: [100, 900],
-} as const satisfies Record<FontFamily, [number, number]>;
+export const FONT_FALLBACK = '<system-ui>';
+
+// biome-ignore format: keep table alignment
+export const FONTS = mapOfStructs(
+    ['name',             'fullName',                             'minWeight', 'maxWeight'],
+    ['Inter',            "'Inter Variable', sans-serif",         100, 900],
+    ['JetBrains Mono',   "'JetBrains Mono Variable', monospace", 100, 800],
+    ['Playfair Display', "'Playfair Display Variable', serif",   400, 900],
+    ['Oxanium',          "'Oxanium Variable', serif",            200, 800],
+    [FONT_FALLBACK,      'system-ui',                            100, 900],
+);
+
+export type FontFamily = keyof typeof FONTS;
+export const FONT_FAMILIES = Object.keys(FONTS) as FontFamily[];
 
 export const BORDER_STYLES = [
     'solid',
@@ -318,8 +295,8 @@ export const isConfig = (value: unknown): value is Config =>
     isRecord(value.label) &&
     isRecord(value.sheet);
 
-const finiteNumber = (fallback: number) => z.number().finite().catch(fallback);
-const finiteNumberOrZero = z.number().finite().catch(0);
+const finiteNumber = (fallback: number) => z.number().catch(fallback);
+const finiteNumberOrZero = z.number().catch(0);
 
 const defaultPaddings: Sides<number> = createPaddings();
 
@@ -375,7 +352,6 @@ const RawLabelSchema = z
         height: finiteNumber(DEFAULT_LABEL_HEIGHT),
         paddings: PaddingsSchema,
     })
-    .passthrough()
     .catch({
         type: DEFAULT_LABEL_TYPE,
         borderColor: DEFAULT_BORDER_COLOR,
@@ -396,7 +372,6 @@ const RawSheetSchema = z
         gapX: finiteNumberOrZero,
         gapY: finiteNumberOrZero,
     })
-    .passthrough()
     .catch({
         format: DEFAULT_FORMAT,
         landscape: false,
@@ -456,10 +431,10 @@ export const ConfigSchema = z
             labelWidth,
             labelHeight,
         );
-        const fontWeight = fitFontPaddings(
-            text.fontWeight,
-            FONT_WEIGHT_RANGES[text.fontFamily],
-        );
+        const fontWeight = fitFontPaddings(text.fontWeight, [
+            FONTS[text.fontFamily].minWeight,
+            FONTS[text.fontFamily].maxWeight,
+        ]);
 
         return {
             image,

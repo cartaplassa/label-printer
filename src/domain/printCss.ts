@@ -1,5 +1,5 @@
 import {
-    FONT_FAMILY_OPTIONS,
+    FONTS,
     type ImageConfig,
     type LabelConfig,
     type SheetConfig,
@@ -63,7 +63,7 @@ export function buildPrintCss({
                 letter-spacing: ${text.letterSpacing}em;
                 text-align: ${text.align};
                 font-size: ${text.size}pt;
-                font-family: ${(text.fontFamily && FONT_FAMILY_OPTIONS?.[text.fontFamily]) ?? 'system-ui'};
+                font-family: ${(text.fontFamily && FONTS?.[text.fontFamily].fullName) ?? 'system-ui'};
                 font-weight: ${text.fontWeight};
                 white-space: pre-wrap;
                 min-width: ${text.wrap ? 'initial' : 'max-content'};

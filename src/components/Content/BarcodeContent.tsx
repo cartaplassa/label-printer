@@ -11,13 +11,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { generateBarcodeDataUrl } from '@/domain/barcode';
 import {
-    BARCODE_HEIGHT_MAX,
-    BARCODE_TYPE_LABELS,
     BARCODE_TYPES,
+    BARCODES,
+    generateBarcodeDataUrl,
     isBarcodeType,
-} from '@/domain/config';
+} from '@/domain/barcode';
+import { BARCODE_HEIGHT_MAX } from '@/domain/config';
 import { useBarcode, useConfigStore } from '@/store';
 import { Row } from './Row';
 import { Pencil, PencilOff } from 'lucide-react';
@@ -59,7 +59,7 @@ export function BarcodeContent() {
                         <SelectGroup>
                             {BARCODE_TYPES.map((type) => (
                                 <SelectItem key={type} value={type}>
-                                    {BARCODE_TYPE_LABELS[type]}
+                                    {BARCODES[type].label}
                                 </SelectItem>
                             ))}
                         </SelectGroup>

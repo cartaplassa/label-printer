@@ -7,16 +7,24 @@ import {
     qrcode,
     upca,
 } from '@bwip-js/browser';
-import type { BarcodeConfig, BarcodeType } from './config';
+import { mapOfStructs } from '@/lib/mapOfStructs';
+import type { BarcodeConfig } from './config';
 
-const encoders: Record<BarcodeType, typeof code128> = {
-    code128,
-    code39,
-    ean13,
-    upca,
-    qrcode,
-    datamatrix,
-};
+// biome-ignore format: keep table alignment
+export const BARCODES = mapOfStructs(
+    ['name',       'label',       'encoder'],
+    ['code128',    'Code 128',    code128],
+    ['code39',     'Code 39',     code39],
+    ['ean13',      'EAN-13',      ean13],
+    ['upca',       'UPC-A',       upca],
+    ['qrcode',     'QR Code',     qrcode],
+    ['datamatrix', 'Data Matrix', datamatrix],
+);
+
+export type BarcodeType = keyof typeof BARCODES;
+export const BARCODE_TYPES = Object.keys(BARCODES) as BarcodeType[];
+export const isBarcodeType = (value: unknown): value is BarcodeType =>
+    BARCODE_TYPES.includes(value as BarcodeType);
 
 const toBwipColor = (value: string): string =>
     value.replace(/^#/, '').slice(0, 6).toUpperCase();
@@ -42,7 +50,7 @@ export function generateBarcodeDataUrl(barcode: BarcodeConfig): BarcodeResult {
             textcolor: toBwipColor(barcode.textColor),
             includetext: barcode.includeText,
         };
-        const svg = encoders[barcode.type](bwipConfig, drawingSVG());
+        const svg = BARCODES[barcode.type].encoder(bwipConfig, drawingSVG());
 
         return {
             url: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,

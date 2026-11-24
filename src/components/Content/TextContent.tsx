@@ -20,7 +20,7 @@ import {
 import {
     FONT_FALLBACK,
     FONT_FAMILIES,
-    FONT_WEIGHT_RANGES,
+    FONTS,
     type FontFamily,
     TEXT_SIZE_MAX,
 } from '@/domain/config';
@@ -115,8 +115,8 @@ export function TextContent() {
                 setValue={(fontWeight) => updateText({ fontWeight })}
                 label="Weight"
                 step={50}
-                min={FONT_WEIGHT_RANGES[text.fontFamily ?? FONT_FALLBACK][0]}
-                max={FONT_WEIGHT_RANGES[text.fontFamily ?? FONT_FALLBACK][1]}
+                min={FONTS[text.fontFamily ?? FONT_FALLBACK].minWeight}
+                max={FONTS[text.fontFamily ?? FONT_FALLBACK].maxWeight}
             />
             <NumberSetter
                 value={text.lineHeight}

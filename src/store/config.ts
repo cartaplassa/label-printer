@@ -44,22 +44,18 @@ const CONFIG_VERSION = 2;
 
 const recordSchema = z.record(z.string(), z.unknown());
 
-const PersistedV2Schema = z
-    .object({
-        image: recordSchema,
-        text: recordSchema,
-        barcode: recordSchema,
-        label: recordSchema,
-        sheet: recordSchema,
-    })
-    .passthrough();
+const PersistedV2Schema = z.object({
+    image: recordSchema,
+    text: recordSchema,
+    barcode: recordSchema,
+    label: recordSchema,
+    sheet: recordSchema,
+});
 
-const PersistedV1Schema = z
-    .object({
-        label: recordSchema,
-        sheet: recordSchema,
-    })
-    .passthrough();
+const PersistedV1Schema = z.object({
+    label: recordSchema,
+    sheet: recordSchema,
+});
 
 const LegacyConfigSchema = recordSchema;
 
