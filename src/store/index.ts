@@ -1,5 +1,5 @@
-export type { ConfigActions, ConfigStore } from './config';
-export { useConfigStore } from './config';
+export type { ConfigAction, ConfigActions } from './config';
+export { configAtom, useConfigActions } from './config';
 export {
     useBarcode,
     useGridLayout,
@@ -10,13 +10,11 @@ export {
     useSizing,
     useText,
 } from './selectors';
-export type {
-    SizingPreset,
-    SizingPresetsActions,
-    SizingPresetsStore,
-} from './sizingPresets';
+export type { SizingPreset, SizingPresetsActions } from './sizingPresets';
 export {
     SIZING_PRESET_NAME_MAX_LENGTH,
     SizingPresetsSchema,
-    useSizingPresetsStore,
+    sizingPresetsAtom,
+    useSizingPresets,
+    useSizingPresetsActions,
 } from './sizingPresets';

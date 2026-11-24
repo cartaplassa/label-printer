@@ -24,12 +24,12 @@ import {
     type FontFamily,
     TEXT_SIZE_MAX,
 } from '@/domain/config';
-import { useConfigStore, useText } from '@/store';
+import { useConfigActions, useText } from '@/store';
 import { Row } from './Row';
 
 export function TextContent() {
     const text = useText();
-    const updateText = useConfigStore((state) => state.updateText);
+    const { updateText } = useConfigActions();
 
     return (
         <>

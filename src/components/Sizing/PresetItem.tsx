@@ -1,3 +1,4 @@
+import { Option, Schema } from 'effect';
 import {
     Check,
     ClipboardPaste,
@@ -8,15 +9,18 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { SizingPresetsSchema, useSizingPresetsStore } from '@/store';
+import {
+    SizingPresetsSchema,
+    useSizingPresets,
+    useSizingPresetsActions,
+} from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 import { PresetForm } from './PresetForm';
 import { PresetRow } from './PresetRow';
 
 export function PresetItem() {
-    const presets = useSizingPresetsStore((state) => state.presets);
-    const deletePresets = useSizingPresetsStore((state) => state.deletePresets);
-    const importPresets = useSizingPresetsStore((state) => state.importPresets);
+    const presets = useSizingPresets();
+    const { deletePresets, importPresets } = useSizingPresetsActions();
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(
         () => new Set(),
@@ -73,11 +77,13 @@ export function PresetItem() {
 
         try {
             const text = await navigator.clipboard.readText();
-            const parsed = SizingPresetsSchema.safeParse(JSON.parse(text));
+            const parsed = Schema.decodeUnknownOption(SizingPresetsSchema)(
+                JSON.parse(text),
+            );
 
-            if (!parsed.success || parsed.data.length === 0) return;
+            if (Option.isNone(parsed) || parsed.value.length === 0) return;
 
-            importPresets(parsed.data);
+            importPresets([...parsed.value]);
             setFeedback('imported');
         } catch {
             return;

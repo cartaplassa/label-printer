@@ -13,12 +13,11 @@ import {
     PAPER_FORMAT_KEYS,
     PAPER_FORMATS,
 } from '@/domain/paper';
-import { useConfigStore, useSheet } from '@/store';
+import { useConfigActions, useSheet } from '@/store';
 
 export function PaperControls() {
     const { format, landscape } = useSheet();
-    const setPaperFormat = useConfigStore((state) => state.setPaperFormat);
-    const toggleLandscape = useConfigStore((state) => state.toggleLandscape);
+    const { setPaperFormat, toggleLandscape } = useConfigActions();
 
     return (
         <div className="flex items-center gap-2">

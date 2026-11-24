@@ -2,13 +2,13 @@ import { NumberSetter } from '@/components/NumberSetter';
 import { paddingLimit } from '@/domain/config';
 import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
-import { useConfigStore, usePaperSize, useSheet } from '@/store';
+import { useConfigActions, usePaperSize, useSheet } from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function SheetPaddingsItem() {
     const { paddings } = useSheet();
     const { width, height, unit } = usePaperSize();
-    const setSheetPadding = useConfigStore((state) => state.setSheetPadding);
+    const { setSheetPadding } = useConfigActions();
 
     return (
         <CustomAccordionItem

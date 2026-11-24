@@ -11,12 +11,12 @@ import {
 } from '@/components/ui/select';
 import { BORDER_STYLES, BORDER_WIDTH_MAX } from '@/domain/config';
 import { cn } from '@/lib/cn';
-import { useConfigStore, useLabel } from '@/store';
+import { useConfigActions, useLabel } from '@/store';
 import { Row } from './Row';
 
 export function BorderContent() {
     const label = useLabel();
-    const updateLabel = useConfigStore((state) => state.updateLabel);
+    const { updateLabel } = useConfigActions();
     return (
         <>
             <NumberSetter

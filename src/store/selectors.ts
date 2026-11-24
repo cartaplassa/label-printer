@@ -1,3 +1,4 @@
+import { useAtomValue } from '@effect/atom-react';
 import { useMemo } from 'react';
 import {
     type BarcodeConfig,
@@ -10,21 +11,22 @@ import {
 } from '@/domain/config';
 import { computeGridLayout, type GridLayout } from '@/domain/layout';
 import { getPaperSize, type PaperSize } from '@/domain/paper';
-import { useConfigStore } from './config';
+import { configAtom } from './config';
 
 export const useImage = (): ImageConfig =>
-    useConfigStore((state) => state.image);
+    useAtomValue(configAtom, (config) => config.image);
 
-export const useText = (): TextConfig => useConfigStore((state) => state.text);
+export const useText = (): TextConfig =>
+    useAtomValue(configAtom, (config) => config.text);
 
 export const useBarcode = (): BarcodeConfig =>
-    useConfigStore((state) => state.barcode);
+    useAtomValue(configAtom, (config) => config.barcode);
 
 export const useLabel = (): LabelConfig =>
-    useConfigStore((state) => state.label);
+    useAtomValue(configAtom, (config) => config.label);
 
 export const useSheet = (): SheetConfig =>
-    useConfigStore((state) => state.sheet);
+    useAtomValue(configAtom, (config) => config.sheet);
 
 export function useSizing(): SizingConfig {
     const label = useLabel();
@@ -34,8 +36,11 @@ export function useSizing(): SizingConfig {
 }
 
 export function usePaperSize(): PaperSize {
-    const format = useConfigStore((state) => state.sheet.format);
-    const landscape = useConfigStore((state) => state.sheet.landscape);
+    const format = useAtomValue(configAtom, (config) => config.sheet.format);
+    const landscape = useAtomValue(
+        configAtom,
+        (config) => config.sheet.landscape,
+    );
 
     return useMemo(() => getPaperSize(format, landscape), [format, landscape]);
 }

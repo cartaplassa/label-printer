@@ -12,13 +12,14 @@ import type { BarcodeConfig } from './config';
 
 // biome-ignore format: keep table alignment
 export const BARCODES = mapOfStructs(
-    ['name',       'label',       'encoder'],
-    ['code128',    'Code 128',    code128],
-    ['code39',     'Code 39',     code39],
-    ['ean13',      'EAN-13',      ean13],
-    ['upca',       'UPC-A',       upca],
-    ['qrcode',     'QR Code',     qrcode],
-    ['datamatrix', 'Data Matrix', datamatrix],
+    ['name',       'label',       'encoder'  ],
+    // ------------------------------------- //
+    ['code128',    'Code 128',    code128    ],
+    ['code39',     'Code 39',     code39     ],
+    ['ean13',      'EAN-13',      ean13      ],
+    ['upca',       'UPC-A',       upca       ],
+    ['qrcode',     'QR Code',     qrcode     ],
+    ['datamatrix', 'Data Matrix', datamatrix ],
 );
 
 export type BarcodeType = keyof typeof BARCODES;

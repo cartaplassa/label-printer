@@ -1,17 +1,19 @@
+import { Optic } from 'effect';
 import { mapOfStructs } from '@/lib/mapOfStructs';
 
 // biome-ignore format: keep table alignment
 export const PAPER_FORMATS = mapOfStructs(
     ['name',    'width', 'height', 'unit'],
-    ['A0',      84.1,    118.9,    'cm'],
-    ['A1',      59.4,    84.1,     'cm'],
-    ['A2',      42.0,    59.4,     'cm'],
-    ['A3',      29.7,    42.0,     'cm'],
-    ['A4',      21.0,    29.7,     'cm'],
-    ['A5',      14.8,    21.0,     'cm'],
-    ['Letter',  8.5,     11,       'in'],
-    ['Legal',   8.5,     14,       'in'],
-    ['Tabloid', 11,      17,       'in'],
+    // --------------------------------- //
+    ['A0',      84.1,    118.9,    'cm'  ],
+    ['A1',      59.4,    84.1,     'cm'  ],
+    ['A2',      42.0,    59.4,     'cm'  ],
+    ['A3',      29.7,    42.0,     'cm'  ],
+    ['A4',      21.0,    29.7,     'cm'  ],
+    ['A5',      14.8,    21.0,     'cm'  ],
+    ['Letter',  8.5,     11,       'in'  ],
+    ['Legal',   8.5,     14,       'in'  ],
+    ['Tabloid', 11,      17,       'in'  ],
 );
 
 export type PaperFormat = keyof typeof PAPER_FORMATS;
@@ -51,11 +53,15 @@ export function getPaperSize(
 }
 
 const CM_PER_INCH = 2.54;
+const centimeters = Optic.makeIso<number, number>(
+    (i) => i / CM_PER_INCH,
+    (m) => m * CM_PER_INCH,
+);
 
 export function convertLength(value: number, from: Unit, to: Unit): number {
     if (from === to) return value;
 
-    return from === 'cm' ? value / CM_PER_INCH : value * CM_PER_INCH;
+    return from === 'cm' ? centimeters.set(value) : centimeters.get(value);
 }
 
 export const roundLength = (value: number): number =>

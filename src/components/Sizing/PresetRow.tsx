@@ -14,13 +14,13 @@ import {
 } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/cn';
 import {
     SIZING_PRESET_NAME_MAX_LENGTH,
     type SizingPreset,
-    useConfigStore,
-    useSizingPresetsStore,
+    useConfigActions,
+    useSizingPresetsActions,
 } from '@/store';
-import { cn } from '@/lib/cn';
 
 interface PresetRowProps {
     preset: SizingPreset;
@@ -37,8 +37,8 @@ export function PresetRow({
 }: PresetRowProps) {
     const [isRenaming, setIsRenaming] = useState(false);
     const [name, setName] = useState(preset.name);
-    const applySizing = useConfigStore((state) => state.applySizing);
-    const renamePreset = useSizingPresetsStore((state) => state.renamePreset);
+    const { applySizing } = useConfigActions();
+    const { renamePreset } = useSizingPresetsActions();
     const trimmedName = name.trim();
 
     useEffect(() => {

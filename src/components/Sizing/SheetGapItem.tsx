@@ -1,12 +1,12 @@
 import { NumberSetter } from '@/components/NumberSetter';
-import { useConfigStore, useLabel, usePaperSize, useSheet } from '@/store';
+import { useConfigActions, useLabel, usePaperSize, useSheet } from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function SheetGapItem() {
     const { gapX, gapY } = useSheet();
     const { width, height } = useLabel();
     const { unit } = usePaperSize();
-    const updateSheet = useConfigStore((state) => state.updateSheet);
+    const { updateSheet } = useConfigActions();
 
     return (
         <CustomAccordionItem isGrid value="sheet-gap" title="Sheet gap">

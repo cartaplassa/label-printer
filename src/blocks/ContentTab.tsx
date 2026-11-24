@@ -7,11 +7,11 @@ import { Field, FieldContent } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { isLabelType, LABEL_TYPES } from '@/domain/config';
 import { capitalize } from '@/lib/capitalize';
-import { useConfigStore, useLabel } from '@/store';
+import { useConfigActions, useLabel } from '@/store';
 
 export function ContentTab() {
     const label = useLabel();
-    const updateLabel = useConfigStore((state) => state.updateLabel);
+    const { updateLabel } = useConfigActions();
 
     return (
         <Column className="text-balance">

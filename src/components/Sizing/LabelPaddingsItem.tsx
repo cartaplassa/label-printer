@@ -2,13 +2,13 @@ import { NumberSetter } from '@/components/NumberSetter';
 import { paddingLimit } from '@/domain/config';
 import { SIDES } from '@/domain/paper';
 import { capitalize } from '@/lib/capitalize';
-import { useConfigStore, useLabel, usePaperSize } from '@/store';
+import { useConfigActions, useLabel, usePaperSize } from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function LabelPaddingsItem() {
     const label = useLabel();
     const { unit } = usePaperSize();
-    const setLabelPadding = useConfigStore((state) => state.setLabelPadding);
+    const { setLabelPadding } = useConfigActions();
 
     return (
         <CustomAccordionItem

@@ -1,3 +1,4 @@
+import { Pencil, PencilOff } from 'lucide-react';
 import { useMemo } from 'react';
 import { ColorPickerPreset } from '@/components/ColorPickerPreset';
 import { ExpandableTextarea } from '@/components/ExpandableTextarea';
@@ -18,13 +19,12 @@ import {
     isBarcodeType,
 } from '@/domain/barcode';
 import { BARCODE_HEIGHT_MAX } from '@/domain/config';
-import { useBarcode, useConfigStore } from '@/store';
+import { useBarcode, useConfigActions } from '@/store';
 import { Row } from './Row';
-import { Pencil, PencilOff } from 'lucide-react';
 
 export function BarcodeContent() {
     const barcode = useBarcode();
-    const updateBarcode = useConfigStore((state) => state.updateBarcode);
+    const { updateBarcode } = useConfigActions();
     const { error } = useMemo(() => generateBarcodeDataUrl(barcode), [barcode]);
 
     return (

@@ -5,13 +5,13 @@ import { Input } from '@/components/ui/input';
 import {
     SIZING_PRESET_NAME_MAX_LENGTH,
     useSizing,
-    useSizingPresetsStore,
+    useSizingPresetsActions,
 } from '@/store';
 
 export function PresetForm() {
     const [name, setName] = useState('');
     const sizing = useSizing();
-    const savePreset = useSizingPresetsStore((state) => state.savePreset);
+    const { savePreset } = useSizingPresetsActions();
     const trimmedName = name.trim();
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = (event) => {

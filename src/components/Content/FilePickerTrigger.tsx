@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { Input } from '@/components/ui/input';
-import { useConfigStore } from '@/store';
+import { useConfigActions } from '@/store';
 
 type FilePickerTriggerProps = {
     disabled?: boolean;
@@ -9,8 +9,7 @@ type FilePickerTriggerProps = {
 export default function FilePickerTrigger({
     disabled,
 }: FilePickerTriggerProps) {
-    const updateImage = useConfigStore((state) => state.updateImage);
-    const resetImage = useConfigStore((state) => state.resetImage);
+    const { updateImage, resetImage } = useConfigActions();
 
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

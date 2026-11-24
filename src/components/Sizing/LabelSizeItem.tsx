@@ -1,11 +1,11 @@
 import { NumberSetter } from '@/components/NumberSetter';
-import { useConfigStore, useLabel, usePaperSize } from '@/store';
+import { useConfigActions, useLabel, usePaperSize } from '@/store';
 import { CustomAccordionItem } from './CustomAccordionItem';
 
 export function LabelSizeItem() {
     const { width, height } = useLabel();
     const { width: paperWidth, height: paperHeight, unit } = usePaperSize();
-    const updateLabel = useConfigStore((state) => state.updateLabel);
+    const { updateLabel } = useConfigActions();
 
     return (
         <CustomAccordionItem value="label-size" title="Label size" isGrid>
