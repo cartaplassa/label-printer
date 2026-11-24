@@ -8,6 +8,8 @@
         "dev:host": "vite --host",
         "build": "tsc -b && vite build && cp dist/index.html dist/404.html",
         "lint": "eslint .",
+        "test": "vitest run",
+        "test:watch": "vitest",
         "preview": "vite preview",
         "act": "act workflow_dispatch"
     },
@@ -48,6 +50,7 @@
         "typescript": "~5.8.3",
         "vite": "^6.4.5",
         "vite-plugin-pwa": "^2.0.0",
+        "vitest": "^5.1.1",
         "workbox-window": "^7.4.1"
     }
 }

@@ -86,7 +86,7 @@ const loadPresets = (): ReadonlyArray<SizingPreset> =>
 const persist = (presets: ReadonlyArray<SizingPreset>): void =>
     presetsStorage.save({ presets });
 
-const applyAction = (
+export const applySizingPresetAction = (
     presets: ReadonlyArray<SizingPreset>,
     action: SizingPresetAction,
 ): ReadonlyArray<SizingPreset> => {
@@ -150,7 +150,7 @@ export const sizingPresetsAtom: Atom.Writable<
 > = Atom.writable(
     (get) => get(stateAtom),
     (ctx, action) => {
-        const presets = applyAction(ctx.get(stateAtom), action);
+        const presets = applySizingPresetAction(ctx.get(stateAtom), action);
         ctx.set(stateAtom, presets);
         persist(presets);
     },

@@ -70,7 +70,10 @@ const patchPaddings = (
     [side]: value,
 });
 
-const applyAction = (config: Config, action: ConfigAction): Config => {
+export const applyConfigAction = (
+    config: Config,
+    action: ConfigAction,
+): Config => {
     switch (action._tag) {
         case 'setPaperFormat': {
             const from = getPaperSize(
@@ -159,7 +162,7 @@ const stateAtom = Atom.keepAlive(Atom.make<Config>(loadConfig()));
 export const configAtom: Atom.Writable<Config, ConfigAction> = Atom.writable(
     (get) => get(stateAtom),
     (ctx, action) => {
-        const config = applyAction(ctx.get(stateAtom), action);
+        const config = applyConfigAction(ctx.get(stateAtom), action);
         ctx.set(stateAtom, config);
         saveConfig(config);
     },

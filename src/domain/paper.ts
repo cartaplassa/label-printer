@@ -61,7 +61,7 @@ const centimeters = Optic.makeIso<number, number>(
 export function convertLength(value: number, from: Unit, to: Unit): number {
     if (from === to) return value;
 
-    return from === 'cm' ? centimeters.set(value) : centimeters.get(value);
+    return from === 'cm' ? centimeters.get(value) : centimeters.set(value);
 }
 
 export const roundLength = (value: number): number =>
