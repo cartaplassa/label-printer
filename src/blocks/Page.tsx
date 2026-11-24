@@ -6,25 +6,41 @@ import {
     Plus,
     RotateCcw,
 } from 'lucide-react';
-import type { ComponentPropsWithoutRef } from 'react';
+import { type ComponentPropsWithoutRef, useMemo } from 'react';
 import {
     TransformComponent,
     TransformWrapper,
     useControls,
 } from 'react-zoom-pan-pinch';
-import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/button';
+import { generateBarcodeDataUrl } from '@/domain/barcode';
 import { formatLength, formatSides } from '@/domain/paper';
 import { buildPrintCss } from '@/domain/printCss';
-import { useGridLayout, useLabel, useSheet } from '@/store';
+import { cn } from '@/lib/cn';
+import {
+    useBarcode,
+    useGridLayout,
+    useImage,
+    useLabel,
+    useSheet,
+    useText,
+} from '@/store';
 
 interface SheetProps extends ComponentPropsWithoutRef<'div'> {}
 
 function Sheet({ className, ...rest }: SheetProps) {
+    const image = useImage();
+    const text = useText();
+    const barcode = useBarcode();
     const label = useLabel();
     const sheet = useSheet();
     const layout = useGridLayout();
     const { paper, cellCount, paddingOverflows } = layout;
+    const barcodeImage = useMemo(
+        () =>
+            label.type === 'barcode' ? generateBarcodeDataUrl(barcode).url : '',
+        [label.type, barcode],
+    );
 
     return (
         <div
@@ -38,7 +54,16 @@ function Sheet({ className, ...rest }: SheetProps) {
             }}
             {...rest}
         >
-            <style>{buildPrintCss({ label, sheet, layout })}</style>
+            <style>
+                {buildPrintCss({
+                    image,
+                    text,
+                    label,
+                    sheet,
+                    layout,
+                    barcodeImage,
+                })}
+            </style>
             <div className="GRID">
                 {Array.from({ length: cellCount }, (_, i) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: the grid has no stable per-cell identity
@@ -46,8 +71,12 @@ function Sheet({ className, ...rest }: SheetProps) {
                         {!paddingOverflows &&
                             (label.type === 'image' ? (
                                 <div className="SERIAL-IMAGE" />
+                            ) : label.type === 'barcode' ? (
+                                barcodeImage ? (
+                                    <div className="SERIAL-BARCODE" />
+                                ) : null
                             ) : (
-                                <p>{label.text}</p>
+                                <p>{text.data}</p>
                             ))}
                     </div>
                 ))}

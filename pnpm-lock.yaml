@@ -14,6 +14,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.9.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@bwip-js/browser':
+        specifier: ^4.11.4
+        version: 4.11.4
       '@fontsource-variable/inter':
         specifier: ^5.3.0
         version: 5.3.0
@@ -737,6 +740,9 @@ packages:
     engines: {node: '>=14.21.3'}
     cpu: [x64]
     os: [win32]
+
+  '@bwip-js/browser@4.11.4':
+    resolution: {integrity: sha512-WZtwXE7YrBw+do7rKqqr2c7pprLa2qTKCA63to1pkwKEBQZ22eBX+L/X6MhNhXY/qP6nIbeHo73R7emRDJpzZA==}
 
   '@canvas/image-data@1.1.0':
     resolution: {integrity: sha512-QdObRRjRbcXGmM1tmJ+MrHcaz1MftF2+W7YI+MsphnsCrmtyfS0d5qJbk0MeSbUeyM/jCb0hmnkXPsy026L7dA==}
@@ -4374,6 +4380,8 @@ snapshots:
 
   '@biomejs/cli-win32-x64@2.0.0-beta.3':
     optional: true
+
+  '@bwip-js/browser@4.11.4': {}
 
   '@canvas/image-data@1.1.0': {}
 

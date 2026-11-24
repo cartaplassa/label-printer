@@ -1,27 +1,38 @@
 import {
     FONT_FAMILY_OPTIONS,
+    type ImageConfig,
     type LabelConfig,
     type SheetConfig,
+    type TextConfig,
 } from './config';
 import type { GridLayout } from './layout';
 import { formatLength, formatSides } from './paper';
 
 export interface PrintCssOptions {
+    image: ImageConfig;
+    text: TextConfig;
     label: LabelConfig;
     sheet: SheetConfig;
     layout: GridLayout;
+    barcodeImage?: string;
 }
 
 const borderWidth = (value: number): string => (value > 0 ? `${value}pt` : '0');
 
 export function buildPrintCss({
+    image,
+    text,
     label,
     sheet,
     layout,
+    barcodeImage,
 }: PrintCssOptions): string {
     const { unit } = layout.paper;
     const width = formatLength(label.width, unit);
     const height = formatLength(label.height, unit);
+    const barcodeBackground = barcodeImage
+        ? `background: no-repeat center/contain url("${barcodeImage}");`
+        : 'background: none;';
 
     return `
             .GRID {
@@ -48,21 +59,28 @@ export function buildPrintCss({
             .CELL p {
                 margin-block-start: 0;
                 margin-block-end: 0;
-                line-height: ${label.lineHeight};
-                letter-spacing: ${label.letterSpacing}em;
-                text-align: ${label.textAlign};
-                font-size: ${label.textSize}pt;
-                font-family: ${(label.fontFamily && FONT_FAMILY_OPTIONS?.[label.fontFamily]) ?? 'system-ui'};
-                font-weight: ${label.fontWeight};
+                line-height: ${text.lineHeight};
+                letter-spacing: ${text.letterSpacing}em;
+                text-align: ${text.align};
+                font-size: ${text.size}pt;
+                font-family: ${(text.fontFamily && FONT_FAMILY_OPTIONS?.[text.fontFamily]) ?? 'system-ui'};
+                font-weight: ${text.fontWeight};
                 white-space: pre-wrap;
-                min-width: ${label.textWrap ? 'initial' : 'max-content'};
-                color: ${label.textColor};
+                min-width: ${text.wrap ? 'initial' : 'max-content'};
+                color: ${text.color};
             }
 
             .CELL .SERIAL-IMAGE {
                 -webkit-print-color-adjust: exact;
                 object-fit: contain;
-                background: no-repeat center/contain url("${label.image}");
+                background: no-repeat center/contain url("${image.data}");
+                width: 100%;
+                height: 100%;
+            }
+
+            .CELL .SERIAL-BARCODE {
+                -webkit-print-color-adjust: exact;
+                ${barcodeBackground}
                 width: 100%;
                 height: 100%;
             }

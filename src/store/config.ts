@@ -3,18 +3,20 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import {
     applySizingConfig,
+    type BarcodePatch,
     type Config,
     convertConfigUnits,
     createDefaultConfig,
-    DEFAULT_IMAGE,
+    createDefaultImageConfig,
+    type ImagePatch,
     type LabelPatch,
     normalizeConfig,
     type SheetPatch,
     type SizingConfig,
+    type TextPatch,
 } from '@/domain/config';
 import {
     getPaperSize,
-    isPaperFormat,
     PAPER_FORMATS,
     type PaperFormat,
     type Side,
@@ -25,26 +27,43 @@ export interface ConfigActions {
     setPaperFormat: (format: PaperFormat) => void;
     toggleLandscape: () => void;
     updateLabel: (patch: LabelPatch) => void;
+    updateImage: (patch: ImagePatch) => void;
+    updateText: (patch: TextPatch) => void;
+    updateBarcode: (patch: BarcodePatch) => void;
     setLabelPadding: (side: Side, value: number) => void;
     updateSheet: (patch: SheetPatch) => void;
     setSheetPadding: (side: Side, value: number) => void;
     applySizing: (sizing: SizingConfig) => void;
-    resetLabelImage: () => void;
+    resetImage: () => void;
     resetConfig: () => void;
 }
 
 export type ConfigStore = Config & ConfigActions;
 
-const CONFIG_VERSION = 1;
+const CONFIG_VERSION = 2;
 
-const PersistedConfigShapeSchema = z
+const recordSchema = z.record(z.string(), z.unknown());
+
+const PersistedV2Schema = z
     .object({
-        label: z.record(z.string(), z.unknown()),
-        sheet: z.record(z.string(), z.unknown()),
+        image: recordSchema,
+        text: recordSchema,
+        barcode: recordSchema,
+        label: recordSchema,
+        sheet: recordSchema,
     })
     .passthrough();
 
-const LegacyConfigSchema = z.record(z.string(), z.unknown());
+const PersistedV1Schema = z
+    .object({
+        label: recordSchema,
+        sheet: recordSchema,
+    })
+    .passthrough();
+
+const LegacyConfigSchema = recordSchema;
+
+type V1Shape = z.infer<typeof PersistedV1Schema>;
 
 const patchPaddings = (
     paddings: Sides<number>,
@@ -55,80 +74,87 @@ const patchPaddings = (
     [side]: value,
 });
 
+function legacyToV1(persisted: unknown, defaults: Config): V1Shape | null {
+    const legacy = LegacyConfigSchema.safeParse(persisted);
+    if (!legacy.success) return null;
+    const old = legacy.data;
+
+    return {
+        label: {
+            type: old.labelType,
+            image: old.labelImage,
+            text: old.labelText,
+            fontFamily: defaults.text.fontFamily,
+            fontWeight: defaults.text.fontWeight,
+            lineHeight: defaults.text.lineHeight,
+            letterSpacing: defaults.text.letterSpacing,
+            textAlign: defaults.text.align,
+            textWrap: defaults.text.wrap,
+            textSize: old.labelTextSize,
+            textColor: defaults.text.color,
+            barcode: defaults.barcode,
+            borderColor: defaults.label.borderColor,
+            borderStyle: defaults.label.borderStyle,
+            borderWidth: old.labelBorderWidth,
+            width: old.labelWidth,
+            height: old.labelHeight,
+            paddings: old.labelPaddings,
+        },
+        sheet: {
+            format: old.paperFormat,
+            landscape: old.isPaperRotationAlbum,
+            paddings: old.sheetPaddings,
+            gapX: old.sheetGapX,
+            gapY: old.sheetGapY,
+        },
+    };
+}
+
+function v1ToConfig(old: V1Shape): Config {
+    const label = old.label;
+
+    return normalizeConfig({
+        image: { data: label.image },
+        text: {
+            data: label.text,
+            fontFamily: label.fontFamily,
+            fontWeight: label.fontWeight,
+            lineHeight: label.lineHeight,
+            letterSpacing: label.letterSpacing,
+            align: label.textAlign,
+            wrap: label.textWrap,
+            size: label.textSize,
+            color: label.textColor,
+        },
+        barcode: label.barcode,
+        label: {
+            type: label.type,
+            borderColor: label.borderColor,
+            borderStyle: label.borderStyle,
+            borderWidth: label.borderWidth,
+            width: label.width,
+            height: label.height,
+            paddings: label.paddings,
+        },
+        sheet: old.sheet,
+    });
+}
+
 function migrateConfig(persisted: unknown, version: number): Config {
     const defaults = createDefaultConfig();
 
     if (version >= CONFIG_VERSION) {
-        const parsed = PersistedConfigShapeSchema.safeParse(persisted);
+        const parsed = PersistedV2Schema.safeParse(persisted);
         return parsed.success ? normalizeConfig(parsed.data) : defaults;
     }
 
-    const legacy = LegacyConfigSchema.safeParse(persisted);
-    if (!legacy.success) return defaults;
-    const old = legacy.data;
+    if (version === 1) {
+        const parsed = PersistedV1Schema.safeParse(persisted);
+        return parsed.success ? v1ToConfig(parsed.data) : defaults;
+    }
 
-    const labelType =
-        old.labelType === 'text' || old.labelType === 'image'
-            ? old.labelType
-            : defaults.label.type;
-
-    return normalizeConfig({
-        label: {
-            type: labelType,
-            image:
-                typeof old.labelImage === 'string'
-                    ? old.labelImage
-                    : defaults.label.image,
-            fontFamily: defaults.label.fontFamily,
-            fontWeight: defaults.label.fontWeight,
-            lineHeight: defaults.label.lineHeight,
-            letterSpacing: defaults.label.letterSpacing,
-            text:
-                typeof old.labelText === 'string'
-                    ? old.labelText
-                    : defaults.label.text,
-            textAlign: defaults.label.textAlign,
-            textWrap: defaults.label.textWrap,
-            textSize:
-                typeof old.labelTextSize === 'number'
-                    ? old.labelTextSize
-                    : defaults.label.textSize,
-            textColor: defaults.label.textColor,
-            borderColor: defaults.label.borderColor,
-            borderStyle: defaults.label.borderStyle,
-            borderWidth:
-                typeof old.labelBorderWidth === 'number'
-                    ? old.labelBorderWidth
-                    : defaults.label.borderWidth,
-            width:
-                typeof old.labelWidth === 'number'
-                    ? old.labelWidth
-                    : defaults.label.width,
-            height:
-                typeof old.labelHeight === 'number'
-                    ? old.labelHeight
-                    : defaults.label.height,
-            paddings: old.labelPaddings ?? defaults.label.paddings,
-        },
-        sheet: {
-            format: isPaperFormat(old.paperFormat)
-                ? old.paperFormat
-                : defaults.sheet.format,
-            landscape:
-                typeof old.isPaperRotationAlbum === 'boolean'
-                    ? old.isPaperRotationAlbum
-                    : defaults.sheet.landscape,
-            paddings: old.sheetPaddings ?? defaults.sheet.paddings,
-            gapX:
-                typeof old.sheetGapX === 'number'
-                    ? old.sheetGapX
-                    : defaults.sheet.gapX,
-            gapY:
-                typeof old.sheetGapY === 'number'
-                    ? old.sheetGapY
-                    : defaults.sheet.gapY,
-        },
-    });
+    const legacy = legacyToV1(persisted, defaults);
+    return legacy ? v1ToConfig(legacy) : defaults;
 }
 
 export const useConfigStore = create<ConfigStore>()(
@@ -136,7 +162,13 @@ export const useConfigStore = create<ConfigStore>()(
         (set) => {
             const setConfig = (updater: (config: Config) => Config) =>
                 set((state) =>
-                    updater({ label: state.label, sheet: state.sheet }),
+                    updater({
+                        image: state.image,
+                        text: state.text,
+                        barcode: state.barcode,
+                        label: state.label,
+                        sheet: state.sheet,
+                    }),
                 );
 
             return {
@@ -170,6 +202,27 @@ export const useConfigStore = create<ConfigStore>()(
                         normalizeConfig({
                             ...config,
                             label: { ...config.label, ...patch },
+                        }),
+                    ),
+                updateImage: (patch) =>
+                    setConfig((config) =>
+                        normalizeConfig({
+                            ...config,
+                            image: { ...config.image, ...patch },
+                        }),
+                    ),
+                updateText: (patch) =>
+                    setConfig((config) =>
+                        normalizeConfig({
+                            ...config,
+                            text: { ...config.text, ...patch },
+                        }),
+                    ),
+                updateBarcode: (patch) =>
+                    setConfig((config) =>
+                        normalizeConfig({
+                            ...config,
+                            barcode: { ...config.barcode, ...patch },
                         }),
                     ),
                 setLabelPadding: (side, value) =>
@@ -209,11 +262,11 @@ export const useConfigStore = create<ConfigStore>()(
                     ),
                 applySizing: (sizing) =>
                     setConfig((config) => applySizingConfig(config, sizing)),
-                resetLabelImage: () =>
+                resetImage: () =>
                     setConfig((config) =>
                         normalizeConfig({
                             ...config,
-                            label: { ...config.label, image: DEFAULT_IMAGE },
+                            image: createDefaultImageConfig(),
                         }),
                     ),
                 resetConfig: () => set(createDefaultConfig()),
@@ -222,10 +275,16 @@ export const useConfigStore = create<ConfigStore>()(
         {
             name: 'labelPrinterStore',
             version: CONFIG_VERSION,
-            partialize: ({ label, sheet }) => ({ label, sheet }),
+            partialize: ({ image, text, barcode, label, sheet }) => ({
+                image,
+                text,
+                barcode,
+                label,
+                sheet,
+            }),
             migrate: migrateConfig,
             merge: (persisted, current) => {
-                const parsed = PersistedConfigShapeSchema.safeParse(persisted);
+                const parsed = PersistedV2Schema.safeParse(persisted);
                 if (!parsed.success) return current;
 
                 return { ...current, ...normalizeConfig(parsed.data) };

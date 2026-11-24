@@ -9,14 +9,14 @@ type FilePickerTriggerProps = {
 export default function FilePickerTrigger({
     disabled,
 }: FilePickerTriggerProps) {
-    const updateLabel = useConfigStore((state) => state.updateLabel);
-    const resetLabelImage = useConfigStore((state) => state.resetLabelImage);
+    const updateImage = useConfigStore((state) => state.updateImage);
+    const resetImage = useConfigStore((state) => state.resetImage);
 
     const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
 
         if (!file) {
-            resetLabelImage();
+            resetImage();
             return;
         }
 
@@ -24,7 +24,7 @@ export default function FilePickerTrigger({
         reader.onload = (loadEvent) => {
             const result = loadEvent.target?.result;
 
-            if (typeof result === 'string') updateLabel({ image: result });
+            if (typeof result === 'string') updateImage({ data: result });
         };
         reader.readAsDataURL(file);
     };

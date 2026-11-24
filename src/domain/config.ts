@@ -12,7 +12,31 @@ import {
     type Unit,
 } from './paper';
 
-export type LabelType = 'text' | 'image';
+export const LABEL_TYPES = ['text', 'image', 'barcode'] as const;
+export type LabelType = (typeof LABEL_TYPES)[number];
+
+export const BARCODE_TYPES = [
+    'code128',
+    'code39',
+    'ean13',
+    'upca',
+    'qrcode',
+    'datamatrix',
+] as const;
+export type BarcodeType = (typeof BARCODE_TYPES)[number];
+
+export const BARCODE_TYPE_LABELS: Record<BarcodeType, string> = {
+    code128: 'Code 128',
+    code39: 'Code 39',
+    ean13: 'EAN-13',
+    upca: 'UPC-A',
+    qrcode: 'QR Code',
+    datamatrix: 'Data Matrix',
+};
+
+export const isBarcodeType = (value: unknown): value is BarcodeType =>
+    BARCODE_TYPES.includes(value as BarcodeType);
+
 export const TEXT_ALIGN_OPTIONS = ['left', 'center', 'right'] as const;
 export type TextAlign = (typeof TEXT_ALIGN_OPTIONS)[number];
 
@@ -46,18 +70,35 @@ export const BORDER_STYLES = [
 ] as const;
 export type BorderStyle = (typeof BORDER_STYLES)[number];
 
-export interface LabelConfig {
-    type: LabelType;
-    image: string;
+export interface ImageConfig {
+    data: string; // data URL
+}
+
+export interface TextConfig {
+    data: string;
     fontFamily: FontFamily;
     fontWeight: number;
     lineHeight: number;
     letterSpacing: number;
-    text: string;
-    textAlign: TextAlign;
-    textWrap: boolean;
-    textSize: number; // pt
+    align: TextAlign;
+    wrap: boolean;
+    size: number; // pt
+    color: string;
+}
+
+export interface BarcodeConfig {
+    type: BarcodeType;
+    data: string;
+    // Opaque input that shapes the generated SVG's aspect ratio; the label
+    // cell determines the printed size.
+    height: number;
+    color: string;
     textColor: string;
+    includeText: boolean;
+}
+
+export interface LabelConfig {
+    type: LabelType;
     borderColor: string;
     borderStyle: BorderStyle;
     borderWidth: number; // pt
@@ -75,6 +116,9 @@ export interface SheetConfig {
 }
 
 export interface Config {
+    image: ImageConfig;
+    text: TextConfig;
+    barcode: BarcodeConfig;
     label: LabelConfig;
     sheet: SheetConfig;
 }
@@ -92,6 +136,9 @@ export interface SizingConfig {
 type PartialNullable<T> = {
     [P in keyof T]?: T[P] | null | undefined;
 };
+export type ImagePatch = PartialNullable<ImageConfig>;
+export type TextPatch = PartialNullable<TextConfig>;
+export type BarcodePatch = PartialNullable<BarcodeConfig>;
 export type LabelPatch = PartialNullable<Omit<LabelConfig, 'paddings'>>;
 export type SheetPatch = PartialNullable<
     Omit<SheetConfig, 'paddings' | 'format' | 'landscape'>
@@ -119,8 +166,41 @@ export const DEFAULT_BORDER_STYLE: BorderStyle = 'solid';
 export const DEFAULT_BORDER_COLOR = '#000000ff';
 export const DEFAULT_LABEL_TYPE: LabelType = 'image';
 
+export const DEFAULT_BARCODE_TYPE: BarcodeType = 'code128';
+export const DEFAULT_BARCODE_DATA = '';
+export const DEFAULT_BARCODE_HEIGHT = 10;
+export const DEFAULT_BARCODE_COLOR = '#000000';
+export const DEFAULT_BARCODE_TEXT_COLOR = '#000000';
+export const DEFAULT_BARCODE_INCLUDE_TEXT = false;
+export const BARCODE_HEIGHT_MAX = 100;
+
 export const isLabelType = (value: unknown): value is LabelType =>
-    value === 'text' || value === 'image';
+    LABEL_TYPES.includes(value as LabelType);
+
+export const createDefaultImageConfig = (): ImageConfig => ({
+    data: DEFAULT_IMAGE,
+});
+
+export const createDefaultTextConfig = (): TextConfig => ({
+    data: DEFAULT_TEXT,
+    fontFamily: DEFAULT_FONT_FAMILY,
+    fontWeight: DEFAULT_FONT_WEIGHT,
+    lineHeight: DEFAULT_LINE_HEIGHT,
+    letterSpacing: DEFAULT_LETTER_SPACING,
+    align: DEFAULT_TEXT_ALIGN,
+    wrap: DEFAULT_TEXT_WRAP,
+    size: DEFAULT_TEXT_SIZE,
+    color: DEFAULT_TEXT_COLOR,
+});
+
+export const createDefaultBarcodeConfig = (): BarcodeConfig => ({
+    type: DEFAULT_BARCODE_TYPE,
+    data: DEFAULT_BARCODE_DATA,
+    height: DEFAULT_BARCODE_HEIGHT,
+    color: DEFAULT_BARCODE_COLOR,
+    textColor: DEFAULT_BARCODE_TEXT_COLOR,
+    includeText: DEFAULT_BARCODE_INCLUDE_TEXT,
+});
 
 const createPaddings = (): Sides<number> => ({
     top: DEFAULT_PADDING,
@@ -131,16 +211,6 @@ const createPaddings = (): Sides<number> => ({
 
 export const createDefaultLabelConfig = (): LabelConfig => ({
     type: DEFAULT_LABEL_TYPE,
-    image: DEFAULT_IMAGE,
-    fontFamily: DEFAULT_FONT_FAMILY,
-    fontWeight: DEFAULT_FONT_WEIGHT,
-    lineHeight: DEFAULT_LINE_HEIGHT,
-    letterSpacing: DEFAULT_LETTER_SPACING,
-    text: DEFAULT_TEXT,
-    textAlign: DEFAULT_TEXT_ALIGN,
-    textWrap: DEFAULT_TEXT_WRAP,
-    textSize: DEFAULT_TEXT_SIZE,
-    textColor: DEFAULT_TEXT_COLOR,
     borderColor: DEFAULT_BORDER_COLOR,
     borderStyle: DEFAULT_BORDER_STYLE,
     borderWidth: DEFAULT_BORDER_WIDTH,
@@ -148,6 +218,7 @@ export const createDefaultLabelConfig = (): LabelConfig => ({
     height: DEFAULT_LABEL_HEIGHT,
     paddings: createPaddings(),
 });
+
 export const createDefaultSheetConfig = (): SheetConfig => ({
     format: DEFAULT_FORMAT,
     landscape: false,
@@ -158,6 +229,9 @@ export const createDefaultSheetConfig = (): SheetConfig => ({
 
 export function createDefaultConfig(): Config {
     return {
+        image: createDefaultImageConfig(),
+        text: createDefaultTextConfig(),
+        barcode: createDefaultBarcodeConfig(),
         label: createDefaultLabelConfig(),
         sheet: createDefaultSheetConfig(),
     };
@@ -180,7 +254,11 @@ export function clampPaddings(
     return {
         top: clamp(paddings.top, 0, paddingLimit('top', width, height)),
         right: clamp(paddings.right, 0, paddingLimit('right', width, height)),
-        bottom: clamp(paddings.bottom, 0, paddingLimit('bottom', width, height)),
+        bottom: clamp(
+            paddings.bottom,
+            0,
+            paddingLimit('bottom', width, height),
+        ),
         left: clamp(paddings.left, 0, paddingLimit('left', width, height)),
     };
 }
@@ -212,6 +290,7 @@ export function convertConfigUnits(
         roundLength(convertLength(value, from, to));
 
     return {
+        ...config,
         label: {
             ...config.label,
             width: convert(config.label.width),
@@ -232,10 +311,14 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export const isConfig = (value: unknown): value is Config =>
-    isRecord(value) && isRecord(value.label) && isRecord(value.sheet);
+    isRecord(value) &&
+    isRecord(value.image) &&
+    isRecord(value.text) &&
+    isRecord(value.barcode) &&
+    isRecord(value.label) &&
+    isRecord(value.sheet);
 
-const finiteNumber = (fallback: number) =>
-    z.number().finite().catch(fallback);
+const finiteNumber = (fallback: number) => z.number().finite().catch(fallback);
 const finiteNumberOrZero = z.number().finite().catch(0);
 
 const defaultPaddings: Sides<number> = createPaddings();
@@ -249,21 +332,42 @@ const PaddingsSchema = z
     })
     .catch(defaultPaddings);
 
-const RawLabelSchema = z
+const ImageSchema = z
     .object({
-        type: z.enum(['text', 'image'] as const).catch(DEFAULT_LABEL_TYPE),
-        image: z.string().catch(DEFAULT_IMAGE),
+        data: z.string().catch(DEFAULT_IMAGE),
+    })
+    .catch(createDefaultImageConfig());
+
+const TextSchema = z
+    .object({
+        data: z.string().catch(DEFAULT_TEXT),
         fontFamily: z
             .enum(FONT_FAMILIES as [FontFamily, ...FontFamily[]])
             .catch(DEFAULT_FONT_FAMILY),
         fontWeight: finiteNumber(DEFAULT_FONT_WEIGHT),
         lineHeight: finiteNumber(DEFAULT_LINE_HEIGHT),
         letterSpacing: finiteNumber(DEFAULT_LETTER_SPACING),
-        text: z.string().catch(DEFAULT_TEXT),
-        textAlign: z.enum(TEXT_ALIGN_OPTIONS).catch(DEFAULT_TEXT_ALIGN),
-        textWrap: z.unknown().transform((value) => Boolean(value)),
-        textSize: finiteNumber(DEFAULT_TEXT_SIZE),
-        textColor: z.string().catch(DEFAULT_TEXT_COLOR),
+        align: z.enum(TEXT_ALIGN_OPTIONS).catch(DEFAULT_TEXT_ALIGN),
+        wrap: z.unknown().transform((value) => value === true),
+        size: finiteNumber(DEFAULT_TEXT_SIZE),
+        color: z.string().catch(DEFAULT_TEXT_COLOR),
+    })
+    .catch(createDefaultTextConfig());
+
+const BarcodeSchema = z
+    .object({
+        type: z.enum(BARCODE_TYPES).catch(DEFAULT_BARCODE_TYPE),
+        data: z.string().catch(DEFAULT_BARCODE_DATA),
+        height: finiteNumber(DEFAULT_BARCODE_HEIGHT),
+        color: z.string().catch(DEFAULT_BARCODE_COLOR),
+        textColor: z.string().catch(DEFAULT_BARCODE_TEXT_COLOR),
+        includeText: z.unknown().transform((value) => value === true),
+    })
+    .catch(createDefaultBarcodeConfig());
+
+const RawLabelSchema = z
+    .object({
+        type: z.enum(LABEL_TYPES).catch(DEFAULT_LABEL_TYPE),
         borderColor: z.string().catch(DEFAULT_BORDER_COLOR),
         borderStyle: z.enum(BORDER_STYLES).catch(DEFAULT_BORDER_STYLE),
         borderWidth: finiteNumber(DEFAULT_BORDER_WIDTH),
@@ -274,16 +378,6 @@ const RawLabelSchema = z
     .passthrough()
     .catch({
         type: DEFAULT_LABEL_TYPE,
-        image: DEFAULT_IMAGE,
-        fontFamily: DEFAULT_FONT_FAMILY,
-        fontWeight: DEFAULT_FONT_WEIGHT,
-        lineHeight: DEFAULT_LINE_HEIGHT,
-        letterSpacing: DEFAULT_LETTER_SPACING,
-        text: DEFAULT_TEXT,
-        textAlign: DEFAULT_TEXT_ALIGN,
-        textWrap: DEFAULT_TEXT_WRAP,
-        textSize: DEFAULT_TEXT_SIZE,
-        textColor: DEFAULT_TEXT_COLOR,
         borderColor: DEFAULT_BORDER_COLOR,
         borderStyle: DEFAULT_BORDER_STYLE,
         borderWidth: DEFAULT_BORDER_WIDTH,
@@ -313,14 +407,38 @@ const RawSheetSchema = z
 
 export const ConfigSchema = z
     .unknown()
-    .transform((input): { label: unknown; sheet: unknown } => {
-        if (!isRecord(input)) return { label: {}, sheet: {} };
-        return {
-            label: isRecord(input.label) ? input.label : {},
-            sheet: isRecord(input.sheet) ? input.sheet : {},
-        };
-    })
+    .transform(
+        (
+            input,
+        ): {
+            image: unknown;
+            text: unknown;
+            barcode: unknown;
+            label: unknown;
+            sheet: unknown;
+        } => {
+            if (!isRecord(input)) {
+                return {
+                    image: {},
+                    text: {},
+                    barcode: {},
+                    label: {},
+                    sheet: {},
+                };
+            }
+            return {
+                image: isRecord(input.image) ? input.image : {},
+                text: isRecord(input.text) ? input.text : {},
+                barcode: isRecord(input.barcode) ? input.barcode : {},
+                label: isRecord(input.label) ? input.label : {},
+                sheet: isRecord(input.sheet) ? input.sheet : {},
+            };
+        },
+    )
     .transform((input): Config => {
+        const image = ImageSchema.parse(input.image);
+        const text = TextSchema.parse(input.text);
+        const barcode = BarcodeSchema.parse(input.barcode);
         const label = RawLabelSchema.parse(input.label);
         const sheet = RawSheetSchema.parse(input.sheet);
 
@@ -339,24 +457,24 @@ export const ConfigSchema = z
             labelHeight,
         );
         const fontWeight = fitFontPaddings(
-            label.fontWeight,
-            FONT_WEIGHT_RANGES[label.fontFamily],
+            text.fontWeight,
+            FONT_WEIGHT_RANGES[text.fontFamily],
         );
 
         return {
+            image,
+            text: {
+                ...text,
+                fontWeight,
+                size: clamp(text.size, 0, TEXT_SIZE_MAX),
+                // TODO: color hex validation
+            },
+            barcode: {
+                ...barcode,
+                height: clamp(barcode.height, 1, BARCODE_HEIGHT_MAX),
+            },
             label: {
                 type: label.type,
-                image: label.image,
-                fontFamily: label.fontFamily,
-                fontWeight,
-                lineHeight: label.lineHeight,
-                letterSpacing: label.letterSpacing,
-                text: label.text,
-                textAlign: label.textAlign,
-                textWrap: label.textWrap,
-                textSize: clamp(label.textSize, 0, TEXT_SIZE_MAX),
-                // TODO: color hex validation
-                textColor: label.textColor,
                 borderColor: label.borderColor,
                 borderStyle: label.borderStyle,
                 borderWidth: clamp(label.borderWidth, 0, BORDER_WIDTH_MAX),
@@ -378,7 +496,9 @@ export function normalizeConfig(config: unknown): Config {
     return ConfigSchema.parse(config);
 }
 
-export function getSizingConfig(config: Config): SizingConfig {
+export function getSizingConfig(
+    config: Pick<Config, 'label' | 'sheet'>,
+): SizingConfig {
     return {
         sheet: config.sheet,
         label: {
